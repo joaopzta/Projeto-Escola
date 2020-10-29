@@ -19,28 +19,31 @@ public class MentoriaService {
     @Autowired
     private MentoriaRepository mentoriaRepository;
 
+    @Autowired
+    private MentoriaMapper mentoriaMapper;
+
     public List<MentoriaDTO> getMentoria() {
         return mentoriaRepository.findByActive(true)
                 .parallelStream()
-                .map(MentoriaMapper::toMentoriaDTO)
+                .map(mentoriaMapper::toMentoriaDTO)
                 .collect(Collectors.toList());
     }
 
     public Optional<MentoriaDTO> getMentoriaById(Long id) {
         return mentoriaRepository.findByIdAndActive(id, true)
-                .map(MentoriaMapper::toMentoriaDTO);
+                .map(mentoriaMapper::toMentoriaDTO);
     }
 
     public MentoriaDTO addMentoria(MentoriaDTO mentoriaDTO) {
-        Mentoria mentoria = MentoriaMapper.toMentoria(mentoriaDTO);
+        Mentoria mentoria = mentoriaMapper.toMentoria(mentoriaDTO);
         mentoria.setActive(true);
-        return MentoriaMapper.toMentoriaDTO(mentoriaRepository.save(mentoria));
+        return mentoriaMapper.toMentoriaDTO(mentoriaRepository.save(mentoria));
     }
 
     public void deleteMentoria(Long id) {
         MentoriaDTO mentoriaDTO = this.getMentoriaById(id)
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
-        Mentoria mentoria = MentoriaMapper.toMentoria(mentoriaDTO);
+        Mentoria mentoria = mentoriaMapper.toMentoria(mentoriaDTO);
         mentoria.setActive(false);
         mentoriaRepository.save(mentoria);
     }
@@ -49,7 +52,7 @@ public class MentoriaService {
         Mentoria mentoria = mentoriaRepository.findByIdAndActive(id, true)
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
         BeanUtils.copyProperties(mentoriaDTO, mentoria, "id");
-        return MentoriaMapper.toMentoriaDTO(mentoriaRepository.save(mentoria));
+        return mentoriaMapper.toMentoriaDTO(mentoriaRepository.save(mentoria));
     }
 
 }

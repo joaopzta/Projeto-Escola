@@ -3,15 +3,19 @@ package com.example.demo.service;
 import com.example.demo.dto.AlunoDTO;
 import com.example.demo.dto.NotaAlunoDTO;
 import com.example.demo.dto.mapper.AlunoMapper;
-import com.example.demo.dto.mapper.NotaAlunoMapper;
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
+import com.example.demo.model.Aluno;
+import com.example.demo.model.Mentoria;
+import com.example.demo.model.NotaAluno;
+import com.example.demo.model.Programa;
+import com.example.demo.repository.AlunoRepository;
+import com.example.demo.repository.MateriaRepository;
+import com.example.demo.repository.MentoriaRepository;
+import com.example.demo.repository.ProgramaRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
-import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,6 +25,9 @@ public class AlunoService {
 
     @Autowired
     private AlunoRepository alunoRepository;
+
+    @Autowired
+    private AlunoMapper alunoMapper;
 
     @Autowired
     private ProgramaRepository programaRepository;
@@ -37,21 +44,21 @@ public class AlunoService {
     public List<AlunoDTO> getAlunos() {
         return alunoRepository.findByActive(true)
                 .parallelStream()
-                .map(AlunoMapper::toAlunoDTO)
+                .map(alunoMapper::toAlunoDTO)
                 .collect(Collectors.toList());
     }
 
     public Optional<AlunoDTO> getAlunoByIndex(Long id) {
         return alunoRepository.findByMatriculaAndActive(id, true)
-                .map(AlunoMapper::toAlunoDTO);
+                .map(alunoMapper::toAlunoDTO);
     }
 
     public AlunoDTO addAluno(AlunoDTO alunoDTO) {
         Programa programa = programaRepository.findByIdAndActive(alunoDTO.getPrograma().getId(), true).orElse(null);
-        Aluno aluno = AlunoMapper.toAluno(alunoDTO);
+        Aluno aluno = alunoMapper.toAluno(alunoDTO);
         aluno.setPrograma(programa);
         aluno.setActive(true);
-        return AlunoMapper.toAlunoDTO(alunoRepository.save(aluno));
+        return alunoMapper.toAlunoDTO(alunoRepository.save(aluno));
     }
 
     public void deleteAluno(Long id) {
@@ -70,14 +77,14 @@ public class AlunoService {
         Aluno aluno = alunoRepository.findByMatriculaAndActive(id, true)
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
         BeanUtils.copyProperties(alunoDTO, aluno, "matricula");
-        return AlunoMapper.toAlunoDTO(alunoRepository.save(aluno));
+        return alunoMapper.toAlunoDTO(alunoRepository.save(aluno));
     }
 
     public AlunoDTO addNotaAluno(Long id, NotaAlunoDTO notaAlunoDTO) {
         Aluno aluno = alunoRepository.findByMatriculaAndActive(id, true)
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
         aluno.getListaNotaAluno().add(notaAlunoService.addNotaAluno(notaAlunoDTO));
-        return AlunoMapper.toAlunoDTO(alunoRepository.save(aluno));
+        return alunoMapper.toAlunoDTO(alunoRepository.save(aluno));
     }
 
     public AlunoDTO updateNotaAluno(Long alunoId, Long notaId, NotaAlunoDTO notaAlunoDTO) {
@@ -85,7 +92,7 @@ public class AlunoService {
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
         NotaAluno notaAluno = aluno.getListaNotaAluno().get(notaId.intValue());
         notaAlunoService.updateNotaAluno(notaAluno.getId(), notaAlunoDTO);
-        return AlunoMapper.toAlunoDTO(aluno);
+        return alunoMapper.toAlunoDTO(aluno);
     }
 
     public void deleteNotaAluno(Long alunoId, Long notaId) {

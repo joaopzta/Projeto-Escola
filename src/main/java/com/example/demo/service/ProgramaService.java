@@ -19,28 +19,31 @@ public class ProgramaService {
     @Autowired
     private ProgramaRepository programaRepository;
 
+    @Autowired
+    private ProgramaMapper programaMapper;
+
     public List<ProgramaDTO> getProgramas() {
         return programaRepository.findByActive(true)
                 .parallelStream()
-                .map(ProgramaMapper::toProgramaDTO)
+                .map(programaMapper::toProgramaDTO)
                 .collect(Collectors.toList());
     }
 
     public Optional<ProgramaDTO> getProgramaById(Long id) {
         return programaRepository.findByIdAndActive(id, true)
-                .map(ProgramaMapper::toProgramaDTO);
+                .map(programaMapper::toProgramaDTO);
     }
 
     public ProgramaDTO addPrograma(ProgramaDTO programaDTO) {
-        Programa programa = ProgramaMapper.toPrograma(programaDTO);
+        Programa programa = programaMapper.toPrograma(programaDTO);
         programa.setActive(true);
-        return ProgramaMapper.toProgramaDTO(programaRepository.save(programa));
+        return programaMapper.toProgramaDTO(programaRepository.save(programa));
     }
 
     public void deletePrograma(Long id) {
         ProgramaDTO programaDTO = this.getProgramaById(id)
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
-        Programa programa = ProgramaMapper.toPrograma(programaDTO);
+        Programa programa = programaMapper.toPrograma(programaDTO);
         programa.setActive(false);
         programaRepository.save(programa);
     }
@@ -49,7 +52,7 @@ public class ProgramaService {
         Programa programaSalvo = programaRepository.findByIdAndActive(id, true)
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
         BeanUtils.copyProperties(programaDTO, programaSalvo, "id");
-        return ProgramaMapper.toProgramaDTO(programaRepository.save(programaSalvo));
+        return programaMapper.toProgramaDTO(programaRepository.save(programaSalvo));
     }
 
 }

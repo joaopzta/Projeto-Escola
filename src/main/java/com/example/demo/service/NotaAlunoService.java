@@ -22,10 +22,13 @@ public class NotaAlunoService {
     @Autowired
     private MateriaRepository materiaRepository;
 
+    @Autowired
+    private NotaAlunoMapper notaAlunoMapper;
+
     public NotaAluno addNotaAluno(NotaAlunoDTO notaAlunoDTO) {
         Materia materia = materiaRepository.findByIdAndActive(notaAlunoDTO.getMateria().getId(), true)
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
-        NotaAluno notaAluno = NotaAlunoMapper.toNotaAluno(notaAlunoDTO);
+        NotaAluno notaAluno = notaAlunoMapper.toNotaAluno(notaAlunoDTO);
         notaAluno.setMateria(materia);
         return notaAlunoRepository.save(notaAluno);
     }
@@ -39,6 +42,6 @@ public class NotaAlunoService {
         NotaAluno notaAluno = notaAlunoRepository.findById(id)
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
         BeanUtils.copyProperties(notaAlunoDTO, notaAluno, "id");
-        return NotaAlunoMapper.toNotaAlunoDTO(notaAlunoRepository.save(notaAluno)); // deveria atualizar na lista tbm
+        return notaAlunoMapper.toNotaAlunoDTO(notaAlunoRepository.save(notaAluno));
     }
 }

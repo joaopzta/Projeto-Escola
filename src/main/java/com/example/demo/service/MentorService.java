@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.dto.MentorDTO;
 import com.example.demo.dto.mapper.MentorMapper;
+import com.example.demo.dto.mapper.MentoriaMapper;
 import com.example.demo.model.Mentor;
 import com.example.demo.model.Mentoria;
 import com.example.demo.repository.MentorRepository;
@@ -24,30 +25,31 @@ public class MentorService {
     @Autowired
     private MentoriaRepository mentoriaRepository;
 
+    @Autowired
+    private MentorMapper mentorMapper;
+
     public List<MentorDTO> getMentores() {
         return mentorRepository.findByActive(true)
                 .parallelStream()
-                .map(MentorMapper::toMentorDTO)
+                .map(mentorMapper::toMentorDTO)
                 .collect(Collectors.toList());
     }
 
     public Optional<MentorDTO> getMentorById(Long id) {
         return mentorRepository.findByIdAndActive(id, true)
-                .map(MentorMapper::toMentorDTO);
+                .map(mentorMapper::toMentorDTO);
     }
 
     public MentorDTO addMentor(MentorDTO mentorDTO) {
-        // Problema: Pode cadastrar um mentor inativo
-        // Solução: Fazer uma verificação e disparar uma exeção
-        Mentor mentor = MentorMapper.toMentor(mentorDTO);
+        Mentor mentor = mentorMapper.toMentor(mentorDTO);
         mentor.setActive(true);
-        return MentorMapper.toMentorDTO(mentorRepository.save(mentor));
+        return mentorMapper.toMentorDTO(mentorRepository.save(mentor));
     }
 
     public void deleteMentor(Long id) {
         MentorDTO mentorDTO = this.getMentorById(id)
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
-        Mentor mentor = MentorMapper.toMentor(mentorDTO);
+        Mentor mentor = mentorMapper.toMentor(mentorDTO);
         mentor.setActive(false);
         mentorRepository.save(mentor);
         List<Mentoria> listaMentoria = mentoriaRepository.findByActive(true);
@@ -61,7 +63,7 @@ public class MentorService {
         Mentor mentorSalvo = mentorRepository.findByIdAndActive(id, true)
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
         BeanUtils.copyProperties(mentorDTO, mentorSalvo, "id");
-        return MentorMapper.toMentorDTO(mentorRepository.save(mentorSalvo));
+        return mentorMapper.toMentorDTO(mentorRepository.save(mentorSalvo));
     }
 
 }

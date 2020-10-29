@@ -19,22 +19,25 @@ public class MateriaService {
     @Autowired
     private MateriaRepository materiaRepository;
 
+    @Autowired
+    private MateriaMapper materiaMapper;
+
     public List<MateriaDTO> getMaterias() {
         return materiaRepository.findByActive(true)
                 .parallelStream()
-                .map(MateriaMapper::toMateriaDTO)
+                .map(materiaMapper::toMateriaDTO)
                 .collect(Collectors.toList());
     }
 
     public Optional<MateriaDTO> getMateriaById(Long id) {
         return materiaRepository.findByIdAndActive(id, true)
-                .map(MateriaMapper::toMateriaDTO);
+                .map(materiaMapper::toMateriaDTO);
     }
 
     public MateriaDTO addMateria(MateriaDTO materiaDTO) {
-        Materia materia = MateriaMapper.toMateria(materiaDTO);
+        Materia materia = materiaMapper.toMateria(materiaDTO);
         materia.setActive(true);
-        return MateriaMapper.toMateriaDTO(materiaRepository.save(materia));
+        return materiaMapper.toMateriaDTO(materiaRepository.save(materia));
     }
 
     public void deleteMateria(Long id) {
@@ -48,7 +51,7 @@ public class MateriaService {
         Materia materia = materiaRepository.findByIdAndActive(id, true)
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
         BeanUtils.copyProperties(materiaDTO, materia, "id");
-        return MateriaMapper.toMateriaDTO(materiaRepository.save(materia));
+        return materiaMapper.toMateriaDTO(materiaRepository.save(materia));
     }
 
 }
