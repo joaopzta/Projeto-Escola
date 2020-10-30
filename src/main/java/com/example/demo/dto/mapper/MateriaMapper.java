@@ -6,8 +6,6 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface MateriaMapper {
-
     Materia toMateria(MateriaDTO materiaDTO);
     MateriaDTO toMateriaDTO(Materia materia);
-
 }

@@ -6,8 +6,6 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface MentorMapper {
-
     Mentor toMentor(MentorDTO mentorDTO);
     MentorDTO toMentorDTO(Mentor mentor);
-
 }

@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.AlunoDTO;
+import com.example.demo.dto.mapper.AlunoMapper;
 import com.example.demo.model.*;
 import com.example.demo.repository.AlunoRepository;
 import com.example.demo.repository.MentoriaRepository;
@@ -32,12 +33,16 @@ public class AlunoServiceTest {
     @Mock
     MentoriaRepository mentoriaRepository;
 
+    @Mock
+    AlunoMapper alunoMapper;
+
     @InjectMocks
     AlunoService alunoService;
 
     @Test
     public void getAlunosTest() {
         Mockito.when(alunoRepository.findByActive(true)).thenReturn(new ArrayList<>());
+
         List<AlunoDTO> listaAlunoDTO = this.alunoService.getAlunos();
 
         Assertions.assertEquals(new ArrayList<>(), listaAlunoDTO);
@@ -46,25 +51,23 @@ public class AlunoServiceTest {
     @Test
     public void getAlunoByIndexTest() {
         Long id = 1L;
-        Mockito.when(alunoRepository.findByMatriculaAndActive(id, true)).thenReturn(Optional.of(
-                new Aluno(
-                        1L,
-                        "joao",
-                        "3-A",
-                        true,
-                        new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true),
-                        new ArrayList<NotaAluno>()
-                )));
-        Optional<AlunoDTO> alunoDTO = this.alunoService.getAlunoByIndex(id);
 
-        Assertions.assertTrue(alunoDTO.isPresent());
+        Aluno aluno = new Aluno(1L, "joao", "3-A", true, new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<NotaAluno>());
+        AlunoDTO alunoDTO = new AlunoDTO(1L, "joao", "3-A", new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<NotaAluno>());
+
+        Mockito.when(alunoRepository.findByMatriculaAndActive(id, true)).thenReturn(Optional.of(aluno));
+        Mockito.when(alunoMapper.toAlunoDTO(aluno)).thenReturn(alunoDTO);
+
+        Optional<AlunoDTO> alunoDTONovo = this.alunoService.getAlunoByIndex(id);
+
+        Assertions.assertTrue(alunoDTONovo.isPresent());
 
         Assertions.assertAll(
-                () -> Assertions.assertEquals(1L, alunoDTO.get().getMatricula()),
-                () -> Assertions.assertEquals("joao", alunoDTO.get().getNome()),
-                () -> Assertions.assertEquals("3-A", alunoDTO.get().getClasse()),
-                () -> Assertions.assertEquals(new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), alunoDTO.get().getPrograma()),
-                () -> Assertions.assertEquals(new ArrayList<NotaAluno>(), alunoDTO.get().getListaNotaAluno())
+                () -> Assertions.assertEquals(alunoDTO.getMatricula(), alunoDTONovo.get().getMatricula()),
+                () -> Assertions.assertEquals(alunoDTO.getNome(), alunoDTONovo.get().getNome()),
+                () -> Assertions.assertEquals(alunoDTO.getClasse(), alunoDTONovo.get().getClasse()),
+                () -> Assertions.assertEquals(alunoDTO.getPrograma(), alunoDTONovo.get().getPrograma()),
+                () -> Assertions.assertEquals(alunoDTO.getListaNotaAluno(), alunoDTONovo.get().getListaNotaAluno())
         );
     }
 
@@ -78,14 +81,17 @@ public class AlunoServiceTest {
         Aluno aluno = new Aluno(1L, "joao", "3-A", true, new Programa(id, nome, ano, true), null);
 
         Mockito.when(programaRepository.findByIdAndActive(id, true)).thenReturn(Optional.of(new Programa(id, nome, ano, true)));
+        Mockito.when(alunoMapper.toAluno(dto)).thenReturn(aluno);
+        Mockito.when(alunoMapper.toAlunoDTO(aluno)).thenReturn(dto);
         Mockito.when(alunoRepository.save(aluno)).thenReturn(aluno);
+
         AlunoDTO alunoDTO = this.alunoService.addAluno(dto);
 
         Assertions.assertAll(
-                () -> Assertions.assertEquals(1L, alunoDTO.getMatricula()),
-                () -> Assertions.assertEquals("joao", alunoDTO.getNome()),
-                () -> Assertions.assertEquals("3-A", alunoDTO.getClasse()),
-                () -> Assertions.assertEquals(new Programa(id, nome, ano, true), alunoDTO.getPrograma()),
+                () -> Assertions.assertEquals(dto.getMatricula(), alunoDTO.getMatricula()),
+                () -> Assertions.assertEquals(dto.getNome(), alunoDTO.getNome()),
+                () -> Assertions.assertEquals(dto.getClasse(), alunoDTO.getClasse()),
+                () -> Assertions.assertEquals(dto.getPrograma(), alunoDTO.getPrograma()),
                 () -> Assertions.assertNull(alunoDTO.getListaNotaAluno())
         );
     }
@@ -98,20 +104,33 @@ public class AlunoServiceTest {
         Mockito.when(alunoRepository.findById(id)).thenReturn(Optional.of(aluno));
         Mockito.when(alunoRepository.save(aluno)).thenReturn(aluno);
         Mockito.when(mentoriaRepository.findByActive(true)).thenReturn(new ArrayList<Mentoria>());
-        Mockito.when(mentoriaRepository.save(mentoria)).thenReturn(mentoria);
+
         this.alunoService.deleteAluno(id);
 
-        Mockito.verify(mentoriaRepository, Mockito.atLeastOnce()).save(mentoria);
+        Mockito.verify(alunoRepository, Mockito.times(1)).findById(id);
+        Mockito.verify(alunoRepository, Mockito.times(1)).save(aluno);
+        Mockito.verify(mentoriaRepository, Mockito.atLeastOnce()).findByActive(true);
+
+        Assertions.assertFalse(aluno.getActive());
+    }
+
+    @Test
+    public void updateAlunoTest() {
+        var id = 1L;
+        Aluno aluno = new Aluno(id, "joao", "3-A", true, new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<>());
+        AlunoDTO alunoDTO = new AlunoDTO(id, "joao", "3-A", new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<>());
+        Mockito.when(alunoRepository.findByMatriculaAndActive(id, true)).thenReturn(Optional.of(aluno));
+        Mockito.when(alunoMapper.toAlunoDTO(aluno)).thenReturn(alunoDTO);
+        Mockito.when(alunoRepository.save(aluno)).thenReturn(aluno);
+
+        AlunoDTO alunoDTONovo = this.alunoService.updateAluno(id, alunoDTO);
 
         Assertions.assertAll(
-                () -> Assertions.assertEquals(id, aluno.getMatricula()),
-                () -> Assertions.assertEquals("joao", aluno.getNome()),
-                () -> Assertions.assertEquals("3-A", aluno.getClasse()),
-                () -> Assertions.assertFalse(aluno.getActive()),
-                () -> Assertions.assertEquals(new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), aluno.getPrograma()),
-                () -> Assertions.assertEquals(new ArrayList<NotaAluno>(), aluno.getListaNotaAluno()),
-                () -> Assertions.assertEquals(aluno, mentoria.getAluno()),
-                () -> Assertions.assertFalse(mentoria.getActive())
+                () -> Assertions.assertEquals(alunoDTO.getMatricula(), alunoDTONovo.getMatricula()),
+                () -> Assertions.assertEquals(alunoDTO.getNome(), alunoDTONovo.getNome()),
+                () -> Assertions.assertEquals(alunoDTO.getClasse(), alunoDTONovo.getClasse()),
+                () -> Assertions.assertEquals(alunoDTO.getPrograma(), alunoDTONovo.getPrograma()),
+                () -> Assertions.assertEquals(alunoDTO.getListaNotaAluno(), alunoDTONovo.getListaNotaAluno())
         );
     }
 

@@ -6,8 +6,6 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface NotaAlunoMapper {
-
     NotaAluno toNotaAluno(NotaAlunoDTO notaAlunoDTO);
     NotaAlunoDTO toNotaAlunoDTO(NotaAluno notaAluno);
-
 }

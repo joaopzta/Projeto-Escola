@@ -11,5 +11,4 @@ import java.util.Optional;
 public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     List<Aluno> findByActive(Boolean active);
     Optional<Aluno> findByMatriculaAndActive(Long matricula, Boolean active);
-
 }
