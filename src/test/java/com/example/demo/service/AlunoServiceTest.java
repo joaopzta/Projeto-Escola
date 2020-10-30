@@ -1,11 +1,15 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.AlunoDTO;
+import com.example.demo.dto.NotaAlunoDTO;
 import com.example.demo.dto.mapper.AlunoMapper;
+import com.example.demo.dto.mapper.NotaAlunoMapper;
 import com.example.demo.model.*;
 import com.example.demo.repository.AlunoRepository;
 import com.example.demo.repository.MentoriaRepository;
 import com.example.demo.repository.ProgramaRepository;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +18,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.util.Assert;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -36,8 +43,16 @@ public class AlunoServiceTest {
     @Mock
     AlunoMapper alunoMapper;
 
+    @Mock
+    NotaAlunoService notaAlunoService;
+
+    @Mock
+    NotaAlunoMapper notaAlunoMapper;
+
     @InjectMocks
     AlunoService alunoService;
+
+//    --------------------- [ Cenários Ideais ] ---------------------------- //
 
     @Test
     public void getAlunosTest() {
@@ -52,8 +67,8 @@ public class AlunoServiceTest {
     public void getAlunoByIndexTest() {
         Long id = 1L;
 
-        Aluno aluno = new Aluno(1L, "joao", "3-A", true, new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<NotaAluno>());
-        AlunoDTO alunoDTO = new AlunoDTO(1L, "joao", "3-A", new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<NotaAluno>());
+        Aluno aluno = new Aluno(1L, "joao", "3-A", true, new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<>());
+        AlunoDTO alunoDTO = new AlunoDTO(1L, "joao", "3-A", new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<>());
 
         Mockito.when(alunoRepository.findByMatriculaAndActive(id, true)).thenReturn(Optional.of(aluno));
         Mockito.when(alunoMapper.toAlunoDTO(aluno)).thenReturn(alunoDTO);
@@ -99,11 +114,10 @@ public class AlunoServiceTest {
     @Test
     public void deleteAlunoTest() {
         Long id = 1L;
-        Aluno aluno = new Aluno(id, "joao", "3-A", true, new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<NotaAluno>());
-        Mentoria mentoria = new Mentoria(2L, aluno, new Mentor(), true);
+        Aluno aluno = new Aluno(id, "joao", "3-A", true, new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<>());
         Mockito.when(alunoRepository.findById(id)).thenReturn(Optional.of(aluno));
         Mockito.when(alunoRepository.save(aluno)).thenReturn(aluno);
-        Mockito.when(mentoriaRepository.findByActive(true)).thenReturn(new ArrayList<Mentoria>());
+        Mockito.when(mentoriaRepository.findByActive(true)).thenReturn(new ArrayList<>());
 
         this.alunoService.deleteAluno(id);
 
@@ -132,6 +146,101 @@ public class AlunoServiceTest {
                 () -> Assertions.assertEquals(alunoDTO.getPrograma(), alunoDTONovo.getPrograma()),
                 () -> Assertions.assertEquals(alunoDTO.getListaNotaAluno(), alunoDTONovo.getListaNotaAluno())
         );
+    }
+
+    @Test
+    public void addNotaAlunoTest() {
+        Long id = 1L;
+        NotaAlunoDTO notaAlunoDTO = new NotaAlunoDTO(10.0, LocalDate.parse("2020-09-09"), new Materia(id, "Java", true));
+        NotaAluno notaAluno = new NotaAluno(id, 10.0, LocalDate.parse("2020-09-09"), new Materia(id, "Java", true));
+        Aluno aluno = new Aluno(id, "joao", "3-A", true, new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<>());
+        AlunoDTO alunoDTO = new AlunoDTO(id, "joao", "3-A", new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<>());
+        List<NotaAluno> listaNotaAluno = new ArrayList<>();
+
+        Mockito.when(alunoRepository.findByMatriculaAndActive(id, true)).thenReturn(Optional.of(aluno));
+        Mockito.when(notaAlunoService.addNotaAluno(notaAlunoDTO)).thenReturn(notaAluno);
+        Mockito.when(alunoMapper.toAlunoDTO(aluno)).thenReturn(alunoDTO);
+        Mockito.when(alunoRepository.save(aluno)).thenReturn(aluno);
+
+        alunoDTO.getListaNotaAluno().add(notaAluno);
+
+        AlunoDTO alunoDTONovo = alunoService.addNotaAluno(id, notaAlunoDTO);
+
+        Assertions.assertAll(
+                () -> Assertions.assertEquals(alunoDTO.getMatricula(), alunoDTONovo.getMatricula()),
+                () -> Assertions.assertEquals(alunoDTO.getNome(), alunoDTONovo.getNome()),
+                () -> Assertions.assertEquals(alunoDTO.getClasse(), alunoDTONovo.getClasse()),
+                () -> Assertions.assertEquals(alunoDTO.getPrograma(), alunoDTONovo.getPrograma()),
+                () -> Assertions.assertEquals(alunoDTO.getListaNotaAluno(), alunoDTONovo.getListaNotaAluno())
+        );
+    }
+
+    @Test
+    public void updateNotaAlunoTest() {
+        Long id = 1L;
+        Long listaId = 0L;
+        List<NotaAluno> listNotaAluno = new ArrayList<>();
+        NotaAlunoDTO notaAlunoDTO = new NotaAlunoDTO(10.0, LocalDate.parse("2020-09-09"), new Materia(id, "Java", true));
+        NotaAluno notaAluno = new NotaAluno(id, 10.0, LocalDate.parse("2020-09-09"), new Materia(id, "Java", true));
+        listNotaAluno.add(notaAluno);
+        Aluno aluno = new Aluno(id, "joao", "3-A", true, new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), listNotaAluno);
+        AlunoDTO alunoDTO = new AlunoDTO(id, "joao", "3-A", new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), listNotaAluno);
+
+        Mockito.when(alunoRepository.findByMatriculaAndActive(id, true)).thenReturn(Optional.of(aluno));
+        Mockito.when(alunoMapper.toAlunoDTO(aluno)).thenReturn(alunoDTO);
+        Mockito.when(notaAlunoService.updateNotaAluno(notaAluno.getId(), notaAlunoDTO)).thenReturn(notaAlunoDTO);
+
+        AlunoDTO alunoDTONovo = alunoService.updateNotaAluno(id, listaId, notaAlunoDTO);
+
+        Assertions.assertAll(
+                () -> Assertions.assertEquals(alunoDTO.getMatricula(), alunoDTONovo.getMatricula()),
+                () -> Assertions.assertEquals(alunoDTO.getNome(), alunoDTONovo.getNome()),
+                () -> Assertions.assertEquals(alunoDTO.getClasse(), alunoDTONovo.getClasse()),
+                () -> Assertions.assertEquals(alunoDTO.getPrograma(), alunoDTONovo.getPrograma()),
+                () -> Assertions.assertEquals(alunoDTO.getListaNotaAluno(), alunoDTONovo.getListaNotaAluno())
+        );
+    }
+
+    @Test
+    public void deleteNotaAlunoTest() {
+        Long id = 1L;
+        Aluno aluno = new Aluno(id, "joao", "3-A", true, new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<>());
+        NotaAluno notaAluno = new NotaAluno(id, 10.0, LocalDate.parse("2020-09-09"), new Materia(id, "Java", true));
+
+        Mockito.when(alunoRepository.findByMatriculaAndActive(id, true)).thenReturn(Optional.of(aluno));
+        Mockito.verify(alunoService, Mockito.atLeastOnce()).deleteNotaAluno(id, 0L);
+        Mockito.verify(notaAlunoService, Mockito.atLeastOnce()).deleteNotaAluno(notaAluno.getId());
+    }
+
+//    --------------------- [ Cenários Com Exceptions ] ---------------------------- //
+
+    @Test
+    public void getAlunoByIndexAlunoNotExistTest() {
+        Long id = null;
+
+        Mockito.when(alunoRepository.findByMatriculaAndActive(id, true)).thenThrow(new EmptyResultDataAccessException(1));
+
+        Assertions.assertNull(id);
+        Assertions.assertThrows(EmptyResultDataAccessException.class, () -> alunoService.getAlunoByIndex(id));
+    }
+
+    @Test
+    public void addAlunoButBodyIsMissing() {
+        AlunoDTO alunoDTO = new AlunoDTO(1L, null, "3-A", new Programa(), new ArrayList<>());
+
+        Mockito.when(alunoMapper.toAluno(alunoDTO)).thenThrow(new HttpMessageNotReadableException("Menssagem inválida"));
+
+        Assertions.assertThrows(HttpMessageNotReadableException.class, () -> alunoService.addAluno(alunoDTO));
+    }
+
+    @Test
+    public void deleteAlunoButAlunoDoesNotExistTest() {
+        Long id = null;
+
+        Mockito.when(alunoRepository.findById(id)).thenThrow(new EmptyResultDataAccessException(1));
+
+        Assertions.assertNull(id);
+        Assertions.assertThrows(EmptyResultDataAccessException.class, () -> alunoService.deleteAluno(id));
     }
 
 }
