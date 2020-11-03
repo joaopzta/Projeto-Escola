@@ -5,8 +5,10 @@ import com.example.demo.service.ProgramaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -29,7 +31,7 @@ public class ProgramaController {
     }
 
     @PostMapping
-    public ResponseEntity<ProgramaDTO> criarPrograma(@RequestBody ProgramaDTO programaDTO) {
+    public ResponseEntity<ProgramaDTO> criarPrograma(@Valid @RequestBody ProgramaDTO programaDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(programaService.addPrograma(programaDTO));
     }
 
@@ -40,7 +42,7 @@ public class ProgramaController {
     }
 
     @PutMapping("/{id}")
-    public ProgramaDTO atualizarPrograma(@PathVariable Long id, @RequestBody ProgramaDTO programaDTO) {
+    public ProgramaDTO atualizarPrograma(@PathVariable Long id, @Valid @RequestBody ProgramaDTO programaDTO) {
         return programaService.updatePrograma(id, programaDTO);
     }
 

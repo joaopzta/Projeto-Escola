@@ -1,12 +1,12 @@
 package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Entity
@@ -27,7 +27,8 @@ public class NotaAluno {
     private LocalDate dataNota;
 
     @ManyToOne
-    @JoinColumn(name = "materia_id")
+    @NotNull
+    @JoinColumn(name = "materia_id", nullable = false)
     private Materia materia;
 
 }

@@ -3,13 +3,13 @@ package com.example.demo.service;
 import com.example.demo.dto.AlunoDTO;
 import com.example.demo.dto.NotaAlunoDTO;
 import com.example.demo.dto.mapper.AlunoMapper;
-import com.example.demo.dto.mapper.NotaAlunoMapper;
-import com.example.demo.model.*;
+import com.example.demo.model.Aluno;
+import com.example.demo.model.Materia;
+import com.example.demo.model.NotaAluno;
+import com.example.demo.model.Programa;
 import com.example.demo.repository.AlunoRepository;
 import com.example.demo.repository.MentoriaRepository;
 import com.example.demo.repository.ProgramaRepository;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,8 +20,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.util.Assert;
 
+import javax.validation.ConstraintViolationException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,9 +45,6 @@ public class AlunoServiceTest {
 
     @Mock
     NotaAlunoService notaAlunoService;
-
-    @Mock
-    NotaAlunoMapper notaAlunoMapper;
 
     @InjectMocks
     AlunoService alunoService;
@@ -204,11 +201,15 @@ public class AlunoServiceTest {
     @Test
     public void deleteNotaAlunoTest() {
         Long id = 1L;
-        Aluno aluno = new Aluno(id, "joao", "3-A", true, new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<>());
+        List<NotaAluno> listNotaAluno = new ArrayList<>();
         NotaAluno notaAluno = new NotaAluno(id, 10.0, LocalDate.parse("2020-09-09"), new Materia(id, "Java", true));
+        listNotaAluno.add(notaAluno);
+        Aluno aluno = new Aluno(id, "joao", "3-A", true, new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), listNotaAluno);
 
         Mockito.when(alunoRepository.findByMatriculaAndActive(id, true)).thenReturn(Optional.of(aluno));
-        Mockito.verify(alunoService, Mockito.atLeastOnce()).deleteNotaAluno(id, 0L);
+
+        alunoService.deleteNotaAluno(id, 0L);
+
         Mockito.verify(notaAlunoService, Mockito.atLeastOnce()).deleteNotaAluno(notaAluno.getId());
     }
 
@@ -226,11 +227,15 @@ public class AlunoServiceTest {
 
     @Test
     public void addAlunoButBodyIsMissing() {
-        AlunoDTO alunoDTO = new AlunoDTO(1L, null, "3-A", new Programa(), new ArrayList<>());
+        Assertions.assertThrows(NullPointerException.class, () -> alunoService.addAluno(null));
+    }
 
-        Mockito.when(alunoMapper.toAluno(alunoDTO)).thenThrow(new HttpMessageNotReadableException("Menssagem inválida"));
-
-        Assertions.assertThrows(HttpMessageNotReadableException.class, () -> alunoService.addAluno(alunoDTO));
+    @Test
+    public void addAlunoButFieldIsNull() {
+        Long id = 1L;
+        AlunoDTO alunoDTO = new AlunoDTO(id, null, "3-A", new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<>());
+        Mockito.when(alunoMapper.toAluno(alunoDTO)).thenThrow(new ConstraintViolationException("", null));
+        Assertions.assertThrows(ConstraintViolationException.class, () -> alunoService.addAluno(alunoDTO));
     }
 
     @Test
@@ -241,6 +246,21 @@ public class AlunoServiceTest {
 
         Assertions.assertNull(id);
         Assertions.assertThrows(EmptyResultDataAccessException.class, () -> alunoService.deleteAluno(id));
+    }
+
+    @Test
+    public void updateAlunoNotExistTest() {
+        Long id = null;
+        AlunoDTO alunoDTO = new AlunoDTO(id, "joao", "3-A", new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<>());
+        Mockito.when(alunoRepository.findByMatriculaAndActive(id, true)).thenThrow(new EmptyResultDataAccessException(1));
+        Assertions.assertThrows(EmptyResultDataAccessException.class, () -> alunoService.updateAluno(id, alunoDTO));
+    }
+
+    @Test
+    public void updateAlunoButBodyIsMissing() {
+        Long id = 1L;
+        Mockito.when(alunoRepository.findByMatriculaAndActive(id, true)).thenThrow(new HttpMessageNotReadableException(""));
+        Assertions.assertThrows(HttpMessageNotReadableException.class, () -> alunoService.updateAluno(id, null));
     }
 
 }

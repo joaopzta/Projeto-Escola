@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Entity
@@ -18,7 +19,10 @@ public class Aluno {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long matricula;
 
+    @NotNull
+    @Column(nullable = false)
     private String nome;
+
     private  String classe;
     private Boolean active;
 

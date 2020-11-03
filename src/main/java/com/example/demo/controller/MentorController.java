@@ -1,15 +1,14 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.MentorDTO;
-import com.example.demo.model.Mentor;
 import com.example.demo.service.MentorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/mentor")
@@ -32,7 +31,7 @@ public class MentorController {
     }
 
     @PostMapping
-    public ResponseEntity<MentorDTO> criarMentor(@RequestBody MentorDTO mentorDTO) {
+    public ResponseEntity<MentorDTO> criarMentor(@Valid @RequestBody MentorDTO mentorDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(mentorService.addMentor(mentorDTO));
     }
 
@@ -43,7 +42,7 @@ public class MentorController {
     }
 
     @PutMapping("/{id}")
-    public MentorDTO atualizarMentor(@PathVariable Long id, @RequestBody MentorDTO mentorDTO) {
+    public MentorDTO atualizarMentor(@PathVariable Long id, @Valid @RequestBody MentorDTO mentorDTO) {
         return mentorService.updateMentor(id, mentorDTO);
     }
 

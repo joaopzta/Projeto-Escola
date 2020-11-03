@@ -5,8 +5,10 @@ import com.example.demo.service.MateriaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -30,7 +32,7 @@ public class MateriaController {
     }
 
     @PostMapping
-    public ResponseEntity<MateriaDTO> criarMateria(@RequestBody MateriaDTO materiaDTO) {
+    public ResponseEntity<MateriaDTO> criarMateria(@Valid @RequestBody MateriaDTO materiaDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(materiaService.addMateria(materiaDTO));
     }
 
@@ -42,7 +44,7 @@ public class MateriaController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public MateriaDTO atualizarMateria(@PathVariable Long id, @RequestBody MateriaDTO materiaDTO) {
+    public MateriaDTO atualizarMateria(@PathVariable Long id, @Valid @RequestBody MateriaDTO materiaDTO) {
         return materiaService.updateMateria(id, materiaDTO);
     }
 
