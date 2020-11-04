@@ -11,7 +11,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
+import javax.validation.ConstraintViolationException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -117,5 +120,67 @@ public class ProgramaServiceTest {
     }
 
     //    --------------------- [ Cenários Com Exceptions ] ---------------------------- //
+
+    @Test
+    public void getProgramaByIndexProgramaNotExistTest() {
+        Long id = null;
+
+        Mockito.when(programaRepository.findByIdAndActive(id, true)).thenThrow(new EmptyResultDataAccessException(1));
+
+        assertThrows(EmptyResultDataAccessException.class, () -> programaService.getProgramaById(id));
+    }
+
+    @Test
+    public void addProgramaButBodyIsMissing() {
+        assertThrows(NullPointerException.class, () -> programaService.addPrograma(null));
+    }
+
+    @Test
+    public void addProgramaButFieldIsNull() {
+        Long id = null;
+        ProgramaDTO programaDTO = new ProgramaDTO(id, null, LocalDate.parse("2020-09-09"));
+
+        Mockito.when(programaMapper.toPrograma(programaDTO)).thenThrow(new ConstraintViolationException("", null));
+
+        assertThrows(ConstraintViolationException.class, () -> programaService.addPrograma(programaDTO));
+    }
+
+    @Test
+    public void deleteProgramaButProgramaDoesNotExistTest() {
+        Long id = null;
+
+        Mockito.when(programaRepository.findByIdAndActive(id, true)).thenThrow(new EmptyResultDataAccessException(1));
+
+        assertThrows(EmptyResultDataAccessException.class, () -> programaService.deletePrograma(id));
+    }
+
+    @Test
+    public void updateProgramaNotExistTest() {
+        Long id = null;
+        ProgramaDTO programaDTO = new ProgramaDTO(id, "marcelo", LocalDate.parse("2020-09-09"));
+
+        Mockito.when(programaRepository.findByIdAndActive(id, true)).thenThrow(new EmptyResultDataAccessException(1));
+
+        assertThrows(EmptyResultDataAccessException.class, () -> programaService.updatePrograma(id, programaDTO));
+    }
+
+    @Test
+    public void updateProgramaButBodyIsMissing() {
+        Long id = 1L;
+
+        Mockito.when(programaRepository.findByIdAndActive(id, true)).thenThrow(new HttpMessageNotReadableException(""));
+
+        assertThrows(HttpMessageNotReadableException.class, () -> programaService.updatePrograma(id, null));
+    }
+
+//    @Test
+//    public void updateProgramaButFieldIsNull() {
+//        Long id = 1L;
+//        ProgramaDTO programaDTO = new ProgramaDTO(id, null, LocalDate.parse("2020-09-09"));
+//
+//        Mockito.when(programaMapper.toPrograma(programaDTO)).thenThrow(new ConstraintViolationException("", null));
+//
+//        assertThrows(ConstraintViolationException.class, () -> programaService.updatePrograma(id, programaDTO));
+//    }
 
 }
