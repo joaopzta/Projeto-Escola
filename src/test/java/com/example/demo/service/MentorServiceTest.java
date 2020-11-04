@@ -2,13 +2,9 @@ package com.example.demo.service;
 
 import com.example.demo.dto.MentorDTO;
 import com.example.demo.dto.mapper.MentorMapper;
-import com.example.demo.model.Aluno;
 import com.example.demo.model.Mentor;
-import com.example.demo.model.Mentoria;
-import com.example.demo.model.Programa;
 import com.example.demo.repository.MentorRepository;
 import com.example.demo.repository.MentoriaRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,8 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
-import java.time.LocalDate;
+import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +37,8 @@ public class MentorServiceTest {
 
     @InjectMocks
     MentorService mentorService;
+
+    //    --------------------- [ Cenários Ideais ] ---------------------------- //
 
     @Test
     public void getMentoresTest() {
@@ -121,6 +121,61 @@ public class MentorServiceTest {
                 () -> assertEquals(mentorDTO.getNome(), mentorSalvo.getNome()),
                 () -> assertEquals(mentorDTO.getPais(), mentorSalvo.getPais())
         );
+    }
+
+    //    --------------------- [ Cenários Com Exceptions ] ---------------------------- //
+
+    @Test
+    public void getMentorByIndexMentorNotExistTest() {
+        Long id = null;
+
+        Mockito.when(mentorRepository.findByIdAndActive(id, true)).thenThrow(new EmptyResultDataAccessException(1));
+
+        assertNull(id);
+        assertThrows(EmptyResultDataAccessException.class, () -> mentorService.getMentorById(id));
+    }
+
+    @Test
+    public void addMentorButBodyIsMissing() {
+        assertThrows(NullPointerException.class, () -> mentorService.addMentor(null));
+    }
+
+    @Test
+    public void addMentorButFieldIsNull() {
+        Long id = 1L;
+        MentorDTO mentorDTO = new MentorDTO(id, null, "brasil");
+
+        Mockito.when(mentorMapper.toMentor(mentorDTO)).thenThrow(new ConstraintViolationException("", null));
+
+        assertThrows(ConstraintViolationException.class, () -> mentorService.addMentor(mentorDTO));
+    }
+
+    @Test
+    public void deleteMentorButMentorDoesNotExistTest() {
+        Long id = null;
+
+        Mockito.when(mentorRepository.findByIdAndActive(id, true)).thenThrow(new EmptyResultDataAccessException(1));
+
+        assertThrows(EmptyResultDataAccessException.class, () -> mentorService.deleteMentor(id));
+    }
+
+    @Test
+    public void updateMentorNotExistTest() {
+        Long id = null;
+        MentorDTO mentorDTO = new MentorDTO(id, "marcelo", "brasil");
+
+        Mockito.when(mentorRepository.findByIdAndActive(id, true)).thenThrow(new EmptyResultDataAccessException(1));
+
+        assertThrows(EmptyResultDataAccessException.class, () -> mentorService.updateMentor(id, mentorDTO));
+    }
+
+    @Test
+    public void updateMentorButBodyIsMissing() {
+        Long id = 1L;
+
+        Mockito.when(mentorRepository.findByIdAndActive(id, true)).thenThrow(new HttpMessageNotReadableException(""));
+
+        assertThrows(HttpMessageNotReadableException.class, () -> mentorService.updateMentor(id, null));
     }
 
 }
