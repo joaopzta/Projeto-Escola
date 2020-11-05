@@ -41,9 +41,8 @@ public class MentoriaService {
     }
 
     public void deleteMentoria(Long id) {
-        MentoriaDTO mentoriaDTO = this.getMentoriaById(id)
+        Mentoria mentoria = mentoriaRepository.findByIdAndActive(id, true)
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
-        Mentoria mentoria = mentoriaMapper.toMentoria(mentoriaDTO);
         mentoria.setActive(false);
         mentoriaRepository.save(mentoria);
     }
