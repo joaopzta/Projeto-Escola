@@ -1,9 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.NotaAlunoDTO;
-import com.example.demo.dto.mapper.AlunoMapper;
 import com.example.demo.dto.mapper.NotaAlunoMapper;
-import com.example.demo.model.Aluno;
 import com.example.demo.model.Materia;
 import com.example.demo.model.NotaAluno;
 import com.example.demo.repository.MateriaRepository;

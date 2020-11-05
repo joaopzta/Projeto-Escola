@@ -65,6 +65,9 @@ public class AlunoService {
         Aluno aluno = alunoRepository.findById(id)
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
         aluno.setActive(false);
+
+        aluno.getListaNotaAluno().forEach(nota -> notaAlunoService.deleteNotaAluno(nota.getId()));
+
         alunoRepository.save(aluno);
         List<Mentoria> listaMentoria = mentoriaRepository.findByActive(true);
         listaMentoria.parallelStream().filter(mentoria -> !mentoria.getAluno().getActive()).forEach(mentoria -> {
