@@ -15,9 +15,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class EscolaExceptionHandler extends ResponseEntityExceptionHandler {
@@ -43,10 +46,20 @@ public class EscolaExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({ ConstraintViolationException.class })
     public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex, WebRequest request) {
-        String mensagemUsuario = messageSource.getMessage("campo.nao-pode-ser-nulo", null, LocaleContextHolder.getLocale());
-        String mensagemDesenvolvedor = ex.toString();
-        List<Erro> erros = Collections.singletonList(new Erro(mensagemUsuario, mensagemDesenvolvedor));
+        List<String> erros = criaListaDeErros(ex);
+        erros.add(ex.getConstraintViolations().toString());
         return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    private List<String> criaListaDeErros (ConstraintViolationException ex) {
+        Set<ConstraintViolation<?>> constraintViolations = ex.getConstraintViolations();
+        String mensagemUsuario = "";
+        return constraintViolations.stream()
+                .map(constraintViolation ->
+                    mensagemUsuario.concat(constraintViolation.getPropertyPath()
+                            .toString()
+                            .toUpperCase() + ": " + constraintViolation.getMessage()))
+                .collect(Collectors.toList());
     }
 
     @Data
