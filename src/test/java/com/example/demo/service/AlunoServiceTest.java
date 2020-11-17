@@ -10,9 +10,7 @@ import com.example.demo.model.Programa;
 import com.example.demo.repository.AlunoRepository;
 import com.example.demo.repository.MentoriaRepository;
 import com.example.demo.repository.ProgramaRepository;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -61,6 +59,7 @@ public class AlunoServiceTest {
     }
 
     @Test
+    //@BeforeAll
     public void getAlunoByIndexTest() {
         Long id = 1L;
 
