@@ -13,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/mentoria")
+@CrossOrigin(origins="http://localhost:3000")
 public class MentoriaController {
 
     @Autowired

@@ -23,6 +23,9 @@ function NavigationBar() {
         <Link to={"/mentor"} className="nav-link">
           Mentor
         </Link>
+        <Link to={"/programa"} className="nav-link">
+          Programa
+        </Link>
       </Nav>
     </Navbar>
   );
