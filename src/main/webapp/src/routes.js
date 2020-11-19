@@ -21,6 +21,7 @@ function Routes() {
               <Route path="/mentor" exact component={Mentor} />
               <Route path="/programa" exact component={Programa} />
               <Route path="/programa/form" exact component={ProgramaForm} />
+              <Route path="/programa/form/:id" exact component={ProgramaForm} />
             </Switch>
           </Col>
         </Row>

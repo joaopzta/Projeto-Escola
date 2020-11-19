@@ -11,7 +11,7 @@ import {
 import api from "../../services/api";
 import { useEffect } from "react";
 import { useState } from "react";
-import MyToast from "../../components/MyToast"
+import MyToast from "../../components/MyToast";
 
 function Programa() {
   const [programas, setProgramas] = useState([]);
@@ -31,7 +31,7 @@ function Programa() {
   const deletePrograma = (id) => {
     api.delete(`programa/${id}`).then((response) => {
       if (response.data !== null) {
-        setProgramas(programas.filter(programa => programa.id !== id));
+        setProgramas(programas.filter((programa) => programa.id !== id));
         setShow(true);
         setTimeout(() => setShow(false), 3000);
       } else {
@@ -47,7 +47,8 @@ function Programa() {
   return (
     <div>
       <div style={{ display: show ? "block" : "none" }}>
-        <MyToast mostrarToast={{ show: show, menssagem: "Programa Excluído com SUCESSO!", type: "danger" }} />
+        <MyToast show={show} menssagem={"Programa Excluído com SUCESSO!"} type={"danger"}
+        />
       </div>
       <Card className={"border border-dark bg-dark text-white"}>
         <Card.Header>
@@ -82,9 +83,12 @@ function Programa() {
                           justifyContent: "space-between",
                         }}
                       >
-                        <Button size="md" variant="outline-primary">
+                        <Link
+                          to={"/programa/form/" + programa.id}
+                          className="btn btn-md btn-outline-primary"
+                        >
                           <FontAwesomeIcon icon={faEdit} />
-                        </Button>
+                        </Link>
                         <Button
                           size="md"
                           variant="outline-danger"

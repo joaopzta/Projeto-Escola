@@ -1,7 +1,7 @@
 import React from 'react';
 import { Toast, ToastBody } from 'react-bootstrap';
 
-export default function MyToast({ mostrarToast }) {
+export default function MyToast({ show, menssagem, type }) {
   const toastCss = {
     position: "fixed",
     top: "10px",
@@ -11,13 +11,13 @@ export default function MyToast({ mostrarToast }) {
   }
 
   return (
-    <div style={mostrarToast.show ? toastCss : null}>
-      <Toast className={`border text-white ${mostrarToast.type === "success" ? "border-success bg-success" : "border-danger bg-danger"} `} show={mostrarToast.show}>
-        <Toast.Header className={`bg-success text-white ${mostrarToast.type === "success" ? "border-success bg-success" : "border-danger bg-danger"}`} closeButton={false}>
+    <div style={show ? toastCss : null}>
+      <Toast className={`border text-white ${type === "success" ? "border-success bg-success" : "border-danger bg-danger"} `} show={show}>
+        <Toast.Header className={`bg-success text-white ${type === "success" ? "border-success bg-success" : "border-danger bg-danger"}`} closeButton={false}>
           <strong className="mr-auto">Sucesso</strong>
         </Toast.Header>
         <ToastBody>
-          {mostrarToast.menssagem}
+          {menssagem}
         </ToastBody>
       </Toast>
     </div>
