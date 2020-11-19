@@ -1,7 +1,7 @@
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 import { Container, Row, Col } from "react-bootstrap";
 
-import NavigationBar from "./pages/NavigationBar";
+import NavigationBar from "./components/NavigationBar";
 import Home from "./pages/Home";
 import Aluno from "./pages/Aluno";
 import Mentor from "./pages/Mentor";
