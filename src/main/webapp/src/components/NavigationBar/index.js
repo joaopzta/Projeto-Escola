@@ -26,6 +26,9 @@ function NavigationBar() {
         <Link to={"/programa"} className="nav-link">
           Programa
         </Link>
+        <Link to={"/materia"} className="nav-link">
+          Materia
+        </Link>
       </Nav>
     </Navbar>
   );

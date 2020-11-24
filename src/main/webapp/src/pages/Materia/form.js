@@ -1,37 +1,35 @@
-import React, { useEffect, useState } from "react";
-import { Button, Card, Form, Col } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEdit,
   faPlusSquare,
   faSave,
   faUndo,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useEffect, useState } from "react";
+import { Button, Card, Form } from "react-bootstrap";
 import MyToast from "../../components/MyToast";
 import api from "../../services/api";
 
-function ProgramaForm(props) {
+function MateriaForm(props) {
   const [id, setId] = useState("");
-  const [nome, setNome] = useState("");
-  const [ano, setAno] = useState("");
+  const [descricao, setDescricao] = useState("");
   const [show, setShow] = useState(false);
   const [metodo, setMetodo] = useState("");
-  
+
   useEffect(() => {
-    const programaId = props.match.params.id;
-    if (programaId) {
-      findProgramById(programaId);
+    const materiaId = props.match.params.id;
+    if (materiaId) {
+      findMateriaById(materiaId);
     }
   }, [props.match.params.id]);
 
-  function findProgramById(id) {
+  function findMateriaById(id) {
     api
-      .get(`programa/${id}`)
+      .get(`materia/${id}`)
       .then((response) => {
         if (response.data !== null) {
           setId(response.data.id);
-          setAno(response.data.ano);
-          setNome(response.data.nome);
+          setDescricao(response.data.descricao);
         }
       })
       .catch((erro) => {
@@ -41,14 +39,12 @@ function ProgramaForm(props) {
 
   function submitForm(event) {
     event.preventDefault();
-    const programa = {
-      nome: nome,
-      ano: ano,
+    const materia = {
+      descricao: descricao,
     };
-    api.post("programa", programa).then((response) => {
+    api.post("materia", materia).then((response) => {
       if (response.data !== null) {
-        setAno("");
-        setNome("");
+        setDescricao("");
         setShow(true);
         setMetodo("post");
         setTimeout(() => setShow(false), 3000);
@@ -60,19 +56,17 @@ function ProgramaForm(props) {
 
   function updateForm(event) {
     event.preventDefault();
-    const programa = {
-      nome: nome,
-      ano: ano,
+    const materia = {
+      descricao: descricao,
     };
-    api.put(`programa/${id}`, programa).then((response) => {
+    api.put(`materia/${id}`, materia).then((response) => {
       if (response.data !== null) {
         setId("");
-        setAno("");
-        setNome("");
+        setDescricao("");
         setShow(true);
         setMetodo("put");
         setTimeout(() => setShow(false), 3000);
-        setTimeout(() => props.history.push("/programa"), 3000);
+        setTimeout(() => props.history.push("/materia"), 3000);
       } else {
         setShow(false);
       }
@@ -84,43 +78,33 @@ function ProgramaForm(props) {
       <div style={{ display: show ? "block" : "none" }}>
         <MyToast
           show={show}
-          menssagem={metodo === "put" ? "Programa Atualizado com SUCESSO!" : "Programa Salvo com SUCESSO!"}
+          menssagem={
+            metodo === "put"
+              ? "Matéria Atualizada com SUCESSO!"
+              : "Matéria Salva com SUCESSO!"
+          }
           type={"success"}
         />
       </div>
       <Card className={"border border-dark bg-dark text-white"}>
         <Card.Header>
           <FontAwesomeIcon icon={id ? faEdit : faPlusSquare} />{" "}
-          {id ? "Atualizar Programa" : "Novo Programa"}
+          {id ? "Atualizar Matéria" : "Novo Matéria"}
         </Card.Header>
-        <Form onSubmit={id ? updateForm : submitForm} id="programaFormId">
+        <Form onSubmit={id ? updateForm : submitForm} id="MateriaFormId">
           <Card.Body>
             <Form.Row>
-              <Form.Group as={Col}>
-                <Form.Label>Descrição</Form.Label>
-                <Form.Control
-                  required
-                  value={nome}
-                  onChange={(event) => {
-                    setNome(event.target.value);
-                  }}
-                  type="text"
-                  name="nome"
-                  placeholder="Nome do Programa"
-                />
-              </Form.Group>
-              <Form.Group as={Col}>
-                <Form.Label>Ano</Form.Label>
-                <Form.Control
-                  required
-                  value={ano}
-                  onChange={(event) => {
-                    setAno(event.target.value);
-                  }}
-                  type="date"
-                  name="ano"
-                />
-              </Form.Group>
+              <Form.Label>Matéria</Form.Label>
+              <Form.Control
+                required
+                value={descricao}
+                onChange={(event) => {
+                  setDescricao(event.target.value);
+                }}
+                type="text"
+                name="descricao"
+                placeholder="Descrição"
+              />
             </Form.Row>
           </Card.Body>
           <Card.Footer style={{ textAlign: "right" }}>
@@ -132,8 +116,7 @@ function ProgramaForm(props) {
               variant="info"
               type="submit"
               onClick={() => {
-                setNome("");
-                setAno("");
+                setDescricao("");
               }}
             >
               <FontAwesomeIcon icon={faUndo} /> Reset
@@ -145,4 +128,4 @@ function ProgramaForm(props) {
   );
 }
 
-export default ProgramaForm;
+export default MateriaForm;

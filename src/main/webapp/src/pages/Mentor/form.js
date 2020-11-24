@@ -10,27 +10,27 @@ import {
 import MyToast from "../../components/MyToast";
 import api from "../../services/api";
 
-function ProgramaForm(props) {
+function MentorForm(props) {
   const [id, setId] = useState("");
   const [nome, setNome] = useState("");
-  const [ano, setAno] = useState("");
+  const [pais, setPais] = useState("");
   const [show, setShow] = useState(false);
   const [metodo, setMetodo] = useState("");
-  
+
   useEffect(() => {
-    const programaId = props.match.params.id;
-    if (programaId) {
-      findProgramById(programaId);
+    const mentorId = props.match.params.id;
+    if (mentorId) {
+      findMentorById(mentorId);
     }
   }, [props.match.params.id]);
 
-  function findProgramById(id) {
+  function findMentorById(id) {
     api
-      .get(`programa/${id}`)
+      .get(`mentor/${id}`)
       .then((response) => {
         if (response.data !== null) {
           setId(response.data.id);
-          setAno(response.data.ano);
+          setPais(response.data.pais);
           setNome(response.data.nome);
         }
       })
@@ -41,13 +41,13 @@ function ProgramaForm(props) {
 
   function submitForm(event) {
     event.preventDefault();
-    const programa = {
+    const mentor = {
       nome: nome,
-      ano: ano,
+      pais: pais,
     };
-    api.post("programa", programa).then((response) => {
+    api.post("mentor", mentor).then((response) => {
       if (response.data !== null) {
-        setAno("");
+        setPais("");
         setNome("");
         setShow(true);
         setMetodo("post");
@@ -60,19 +60,19 @@ function ProgramaForm(props) {
 
   function updateForm(event) {
     event.preventDefault();
-    const programa = {
+    const mentor = {
       nome: nome,
-      ano: ano,
+      pais: pais,
     };
-    api.put(`programa/${id}`, programa).then((response) => {
+    api.put(`mentor/${id}`, mentor).then((response) => {
       if (response.data !== null) {
         setId("");
-        setAno("");
+        setPais("");
         setNome("");
         setShow(true);
         setMetodo("put");
         setTimeout(() => setShow(false), 3000);
-        setTimeout(() => props.history.push("/programa"), 3000);
+        setTimeout(() => props.history.push("/mentor"), 3000);
       } else {
         setShow(false);
       }
@@ -84,20 +84,24 @@ function ProgramaForm(props) {
       <div style={{ display: show ? "block" : "none" }}>
         <MyToast
           show={show}
-          menssagem={metodo === "put" ? "Programa Atualizado com SUCESSO!" : "Programa Salvo com SUCESSO!"}
+          menssagem={
+            metodo === "put"
+              ? "Mentor Atualizado com SUCESSO!"
+              : "Mentor Salvo com SUCESSO!"
+          }
           type={"success"}
         />
       </div>
       <Card className={"border border-dark bg-dark text-white"}>
         <Card.Header>
           <FontAwesomeIcon icon={id ? faEdit : faPlusSquare} />{" "}
-          {id ? "Atualizar Programa" : "Novo Programa"}
+          {id ? "Atualizar Mentor" : "Novo Mentor"}
         </Card.Header>
-        <Form onSubmit={id ? updateForm : submitForm} id="programaFormId">
+        <Form onSubmit={id ? updateForm : submitForm} id="MentorFormId">
           <Card.Body>
             <Form.Row>
               <Form.Group as={Col}>
-                <Form.Label>Descrição</Form.Label>
+                <Form.Label>Nome</Form.Label>
                 <Form.Control
                   required
                   value={nome}
@@ -106,19 +110,20 @@ function ProgramaForm(props) {
                   }}
                   type="text"
                   name="nome"
-                  placeholder="Nome do Programa"
+                  placeholder="Nome do Mentor"
                 />
               </Form.Group>
               <Form.Group as={Col}>
-                <Form.Label>Ano</Form.Label>
+                <Form.Label>País</Form.Label>
                 <Form.Control
                   required
-                  value={ano}
+                  value={pais}
                   onChange={(event) => {
-                    setAno(event.target.value);
+                    setPais(event.target.value);
                   }}
-                  type="date"
-                  name="ano"
+                  type="text"
+                  name="pais"
+                  placeholder="País de Origem"
                 />
               </Form.Group>
             </Form.Row>
@@ -133,7 +138,7 @@ function ProgramaForm(props) {
               type="submit"
               onClick={() => {
                 setNome("");
-                setAno("");
+                setPais("");
               }}
             >
               <FontAwesomeIcon icon={faUndo} /> Reset
@@ -145,4 +150,4 @@ function ProgramaForm(props) {
   );
 }
 
-export default ProgramaForm;
+export default MentorForm;

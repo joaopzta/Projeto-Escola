@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import MyToast from "../../components/MyToast";
 import {
@@ -22,32 +22,32 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import api from "../../services/api";
 
-function Mentor() {
-  const [mentores, setMentores] = useState([]);
+function Materia() {
+  const [materias, setMaterias] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [mentoresPerPage] = useState(5);
+  const [materiasPerPage] = useState(5);
   const [show, setShow] = useState(false);
 
-  const lastIndex = currentPage * mentoresPerPage;
-  const firstIndex = lastIndex - mentoresPerPage;
-  const currentMentores = mentores.slice(firstIndex, lastIndex);
-  const totalPages = mentores.length / mentoresPerPage;
+  const lastIndex = currentPage * materiasPerPage;
+  const firstIndex = lastIndex - materiasPerPage;
+  const currentMaterias = materias.slice(firstIndex, lastIndex);
+  const totalPages = materias.length / materiasPerPage;
 
-  useEffect(findAllProgramas, []);
+  useEffect(findAllMaterias, []);
 
-  function findAllProgramas() {
+  function findAllMaterias() {
     api
-      .get("mentor")
+      .get("materia")
       .then((response) => response.data)
       .then((data) => {
-        setMentores(data);
+        setMaterias(data);
       });
   }
 
-  function deleteMentor(id) {
-    api.delete(`mentor/${id}`).then((response) => {
+  function deleteMateria(id) {
+    api.delete(`materia/${id}`).then((response) => {
       if (response.data !== null) {
-        setMentores(mentores.filter((mentor) => mentor.id !== id));
+        setMaterias(materias.filter((materia) => materia.id !== id));
         setShow(true);
         setTimeout(() => setShow(false), 3000);
       } else {
@@ -73,14 +73,14 @@ function Mentor() {
   }
 
   function nextPage() {
-    if (currentPage < Math.ceil(mentores.length / mentoresPerPage)) {
+    if (currentPage < Math.ceil(materias.length / materiasPerPage)) {
       setCurrentPage(currentPage + 1);
     }
   }
 
   function lastPage() {
-    if (currentPage < Math.ceil(mentores.length / mentoresPerPage)) {
-      setCurrentPage(Math.ceil(mentores.length / mentoresPerPage));
+    if (currentPage < Math.ceil(materias.length / materiasPerPage)) {
+      setCurrentPage(Math.ceil(materias.length / materiasPerPage));
     }
   }
 
@@ -97,36 +97,34 @@ function Mentor() {
       <div style={{ display: show ? "block" : "none" }}>
         <MyToast
           show={show}
-          menssagem={"Aluno Excluído com SUCESSO!"}
+          menssagem={"Matéria Excluída com SUCESSO!"}
           type={"danger"}
         />
       </div>
       <Card className={"border border-dark bg-dark text-white"}>
         <Card.Header>
           <FontAwesomeIcon icon={faList} />
-          {"  "}Lista de Mentores
+          {"  "}Lista de Matérias
         </Card.Header>
         <Card.Body>
           <Table bordered hover striped variant="dark">
             <thead>
               <tr>
                 <th>Id</th>
-                <th>Nome</th>
-                <th>País</th>
+                <th>Descrição</th>
                 <th>Ações</th>
               </tr>
             </thead>
             <tbody>
-              {mentores.length === 0 ? (
+              {materias.length === 0 ? (
                 <tr align="center">
-                  <td colSpan="4">Sem Mentores</td>
+                  <td colSpan="3">Sem Matérias</td>
                 </tr>
               ) : (
-                currentMentores.map((mentor) => (
-                  <tr key={mentor.id}>
-                    <td>{mentor.id}</td>
-                    <td>{mentor.nome}</td>
-                    <td>{mentor.pais}</td>
+                currentMaterias.map((materia) => (
+                  <tr key={materia.id}>
+                    <td>{materia.id}</td>
+                    <td>{materia.descricao}</td>
                     <td>
                       <ButtonGroup
                         style={{
@@ -135,7 +133,7 @@ function Mentor() {
                         }}
                       >
                         <Link
-                          to={"/mentor/form/" + mentor.id}
+                          to={"/materia/form/" + materia.id}
                           className="btn btn-md btn-outline-primary"
                         >
                           <FontAwesomeIcon icon={faEdit} />
@@ -143,7 +141,7 @@ function Mentor() {
                         <Button
                           size="md"
                           variant="outline-danger"
-                          onClick={() => deleteMentor(mentor.id)}
+                          onClick={() => deleteMateria(materia.id)}
                         >
                           <FontAwesomeIcon icon={faTrash} />
                         </Button>
@@ -154,9 +152,9 @@ function Mentor() {
               )}
             </tbody>
           </Table>
-          <Link to={"/mentor/form"} className="nav-link">
+          <Link to={"/materia/form"} className="nav-link">
             <Button block>
-              <FontAwesomeIcon icon={faPlusCircle} /> Novo Mentor
+              <FontAwesomeIcon icon={faPlusCircle} /> Nova Matéria
             </Button>
           </Link>
         </Card.Body>
@@ -217,4 +215,4 @@ function Mentor() {
   );
 }
 
-export default Mentor;
+export default Materia;

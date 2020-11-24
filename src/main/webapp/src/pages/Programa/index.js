@@ -35,7 +35,7 @@ function Programa() {
   const currentProgramas = programas.slice(firstIndex, lastIndex);
   const totalPages = programas.length / programasPerPage;
 
-  useEffect(findAllProgramas);
+  useEffect(findAllProgramas, []);
 
   function findAllProgramas() {
     api
