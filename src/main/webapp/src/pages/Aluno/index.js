@@ -19,6 +19,7 @@ import {
   faStepBackward,
   faFastForward,
   faFastBackward,
+  faChalkboardTeacher,
 } from "@fortawesome/free-solid-svg-icons";
 import api from "../../services/api";
 
@@ -27,60 +28,65 @@ function Aluno() {
   const [currentPage, setCurrentPage] = useState(1);
   const [alunosPerPage] = useState(5);
   const [show, setShow] = useState(false);
+  const [totalPages, setTotalPages] = useState(null);
+  const [totalElements, setTotalElements] = useState(null);
 
-  const lastIndex = currentPage * alunosPerPage;
-  const firstIndex = lastIndex - alunosPerPage;
-  const currentAlunos = alunos.slice(firstIndex, lastIndex);
-  const totalPages = alunos.length / alunosPerPage;
+  useEffect(() => findAllAlunos(currentPage), [alunosPerPage]);
 
-  useEffect(findAllAlunos, []);
-
-  function findAllAlunos() {
+  function findAllAlunos(currentPage) {
+    currentPage -= 1;
     api
-      .get("aluno")
+      .get(`aluno?page=${currentPage}&size=${alunosPerPage}`)
       .then((response) => response.data)
       .then((data) => {
-        setAlunos(data);
+        setAlunos(data.content);
+        setTotalPages(data.totalPages);
+        setTotalElements(data.totalElements);
+        setCurrentPage(data.number + 1);
       });
   }
 
-  function deleteAluno(id) {
-    api.delete(`aluno/${id}`).then((response) => {
-      if (response.data !== null) {
-        setAlunos(alunos.filter((aluno) => aluno.matricula !== id));
-        setShow(true);
-        setTimeout(() => setShow(false), 3000);
-      } else {
-        setShow(false);
-      }
-    });
+  async function deleteAluno(id) {
+    const response = await api.delete(`aluno/${id}`);
+    if (response.data !== null) {
+      setAlunos(alunos.filter((aluno) => aluno.matricula !== id));
+      setShow(true);
+      setTimeout(() => setShow(false), 3000);
+    } else {
+      setShow(false);
+    }
   }
 
   function changePage(event) {
-    setCurrentPage(parseInt(event.target.value || "1"));
+    let targetPage = parseInt(event.target.value || "1");
+    findAllAlunos(targetPage);
+    setCurrentPage(targetPage);
   }
 
   function firstPage() {
-    if (currentPage > 1) {
-      setCurrentPage(1);
+    let firstPage = 1;
+    if (currentPage > firstPage) {
+      findAllAlunos(firstPage);
     }
   }
 
   function prevPage() {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+    let prevPage = 1
+    if (currentPage > prevPage) {
+      findAllAlunos(currentPage - prevPage);
     }
   }
 
   function nextPage() {
-    if (currentPage < Math.ceil(alunos.length / alunosPerPage)) {
-      setCurrentPage(currentPage + 1);
+    if (currentPage < Math.ceil(totalElements / alunosPerPage)) {
+      findAllAlunos(currentPage + 1);
     }
   }
 
   function lastPage() {
-    if (currentPage < Math.ceil(alunos.length / alunosPerPage)) {
-      setCurrentPage(Math.ceil(alunos.length / alunosPerPage));
+    let lastPage = Math.ceil(totalElements / alunosPerPage)
+    if (currentPage < lastPage) {
+      findAllAlunos(lastPage);
     }
   }
 
@@ -123,7 +129,7 @@ function Aluno() {
                   <td colSpan="5">Sem Alunos</td>
                 </tr>
               ) : (
-                currentAlunos.map((aluno) => (
+                alunos.map((aluno) => (
                   <tr key={aluno.matricula}>
                     <td>{aluno.matricula}</td>
                     <td>{aluno.nome}</td>
@@ -149,6 +155,12 @@ function Aluno() {
                         >
                           <FontAwesomeIcon icon={faTrash} />
                         </Button>
+                        <Link
+                          to={`/aluno/${aluno.matricula}/mentoria/`}
+                          className="btn btn-md btn-outline-info"
+                        >
+                          <FontAwesomeIcon icon={faChalkboardTeacher} />
+                        </Link>
                       </ButtonGroup>
                     </td>
                   </tr>
@@ -197,7 +209,9 @@ function Aluno() {
                 <Button
                   type="button"
                   variant="outline-info"
-                  disabled={currentPage === Math.ceil(totalPages) ? true : false}
+                  disabled={
+                    currentPage === Math.ceil(totalPages) ? true : false
+                  }
                   onClick={nextPage}
                 >
                   <FontAwesomeIcon icon={faStepForward} /> Next
@@ -205,7 +219,9 @@ function Aluno() {
                 <Button
                   type="button"
                   variant="outline-info"
-                  disabled={currentPage === Math.ceil(totalPages) ? true : false}
+                  disabled={
+                    currentPage === Math.ceil(totalPages) ? true : false
+                  }
                   onClick={lastPage}
                 >
                   <FontAwesomeIcon icon={faFastForward} /> Last

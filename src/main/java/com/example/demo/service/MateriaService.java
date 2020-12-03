@@ -7,6 +7,8 @@ import com.example.demo.repository.MateriaRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,11 +24,8 @@ public class MateriaService {
     @Autowired
     private MateriaMapper materiaMapper;
 
-    public List<MateriaDTO> getMaterias() {
-        return materiaRepository.findByActive(true)
-                .parallelStream()
-                .map(materiaMapper::toMateriaDTO)
-                .collect(Collectors.toList());
+    public Page<MateriaDTO> getMaterias(Pageable pageable) {
+        return materiaRepository.findByActive(pageable, true).map(materiaMapper::toMateriaDTO);
     }
 
     public Optional<MateriaDTO> getMateriaById(Long id) {

@@ -3,12 +3,13 @@ package com.example.demo.controller;
 import com.example.demo.dto.MentorDTO;
 import com.example.demo.service.MentorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/mentor")
@@ -20,8 +21,8 @@ public class MentorController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<MentorDTO> listarMentores() {
-        return mentorService.getMentores();
+    public Page<MentorDTO> listarMentores(Pageable pageable) {
+        return mentorService.getMentores(pageable);
     }
 
     @GetMapping("/{id}")
@@ -38,8 +39,8 @@ public class MentorController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removerMentor(@PathVariable Long id) {
-        mentorService.deleteMentor(id);
+    public void removerMentor(Pageable pageable, @PathVariable Long id) {
+        mentorService.deleteMentor(pageable, id);
     }
 
     @PutMapping("/{id}")

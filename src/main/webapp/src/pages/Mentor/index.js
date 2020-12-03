@@ -19,6 +19,7 @@ import {
   faStepBackward,
   faFastForward,
   faFastBackward,
+  faChalkboardTeacher,
 } from "@fortawesome/free-solid-svg-icons";
 import api from "../../services/api";
 
@@ -26,21 +27,22 @@ function Mentor() {
   const [mentores, setMentores] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [mentoresPerPage] = useState(5);
+  const [totalElements, setTotalElements] = useState(null);
+  const [totalPages, setTotalPages] = useState(null);
   const [show, setShow] = useState(false);
 
-  const lastIndex = currentPage * mentoresPerPage;
-  const firstIndex = lastIndex - mentoresPerPage;
-  const currentMentores = mentores.slice(firstIndex, lastIndex);
-  const totalPages = mentores.length / mentoresPerPage;
+  useEffect(() => findAllMentores(currentPage), [mentoresPerPage]);
 
-  useEffect(findAllProgramas, []);
-
-  function findAllProgramas() {
+  function findAllMentores(currentPage) {
+    currentPage -= 1;
     api
-      .get("mentor")
+      .get(`mentor?page=${currentPage}&size=${mentoresPerPage}`)
       .then((response) => response.data)
       .then((data) => {
-        setMentores(data);
+        setMentores(data.content);
+        setTotalPages(data.totalPages);
+        setTotalElements(data.totalElements);
+        setCurrentPage(currentPage + 1);
       });
   }
 
@@ -57,30 +59,35 @@ function Mentor() {
   }
 
   function changePage(event) {
-    setCurrentPage(parseInt(event.target.value || "1"));
+    let targetPage = parseInt(event.target.value || "1");
+    findAllMentores(targetPage);
+    setCurrentPage(targetPage);
   }
 
   function firstPage() {
-    if (currentPage > 1) {
-      setCurrentPage(1);
+    let firstPage = 1;
+    if (currentPage > firstPage) {
+      findAllMentores(firstPage);
     }
   }
 
   function prevPage() {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+    let prevPage = 1
+    if (currentPage > prevPage) {
+      findAllMentores(currentPage - prevPage);
     }
   }
 
   function nextPage() {
     if (currentPage < Math.ceil(mentores.length / mentoresPerPage)) {
-      setCurrentPage(currentPage + 1);
+      findAllMentores(currentPage + 1);
     }
   }
 
   function lastPage() {
-    if (currentPage < Math.ceil(mentores.length / mentoresPerPage)) {
-      setCurrentPage(Math.ceil(mentores.length / mentoresPerPage));
+    let lastPage = Math.ceil(totalElements / mentoresPerPage);
+    if (currentPage < lastPage) {
+      findAllMentores(lastPage);
     }
   }
 
@@ -122,7 +129,7 @@ function Mentor() {
                   <td colSpan="4">Sem Mentores</td>
                 </tr>
               ) : (
-                currentMentores.map((mentor) => (
+                mentores.map((mentor) => (
                   <tr key={mentor.id}>
                     <td>{mentor.id}</td>
                     <td>{mentor.nome}</td>
@@ -147,6 +154,12 @@ function Mentor() {
                         >
                           <FontAwesomeIcon icon={faTrash} />
                         </Button>
+                        <Link
+                          to={`/mentor/${mentor.id}/mentoria`}
+                          className="btn btn-md btn-outline-info"
+                        >
+                          <FontAwesomeIcon icon={faChalkboardTeacher} />
+                        </Link>
                       </ButtonGroup>
                     </td>
                   </tr>
@@ -195,7 +208,9 @@ function Mentor() {
                 <Button
                   type="button"
                   variant="outline-info"
-                  disabled={currentPage === Math.ceil(totalPages) ? true : false}
+                  disabled={
+                    currentPage === Math.ceil(totalPages) ? true : false
+                  }
                   onClick={nextPage}
                 >
                   <FontAwesomeIcon icon={faStepForward} /> Next
@@ -203,7 +218,9 @@ function Mentor() {
                 <Button
                   type="button"
                   variant="outline-info"
-                  disabled={currentPage === Math.ceil(totalPages) ? true : false}
+                  disabled={
+                    currentPage === Math.ceil(totalPages) ? true : false
+                  }
                   onClick={lastPage}
                 >
                   <FontAwesomeIcon icon={faFastForward} /> Last

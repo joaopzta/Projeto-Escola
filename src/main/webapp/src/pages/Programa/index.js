@@ -28,21 +28,22 @@ function Programa() {
   const [programas, setProgramas] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [programasPerPage] = useState(5);
+  const [totalPages, setTotalPages] = useState(null);
+  const [totalElements, setTotalElements] = useState(null);
   const [show, setShow] = useState(false);
 
-  const lastIndex = currentPage * programasPerPage;
-  const firstIndex = lastIndex - programasPerPage;
-  const currentProgramas = programas.slice(firstIndex, lastIndex);
-  const totalPages = programas.length / programasPerPage;
+  useEffect(() => findAllProgramas(currentPage), [programasPerPage]);
 
-  useEffect(findAllProgramas, []);
-
-  function findAllProgramas() {
+  function findAllProgramas(currentPage) {
+    currentPage -= 1;
     api
-      .get("programa")
+      .get(`programa?page=${currentPage}&size=${programasPerPage}`)
       .then((response) => response.data)
       .then((data) => {
-        setProgramas(data);
+        setProgramas(data.content);
+        setTotalPages(data.totalPages);
+        setTotalElements(data.totalElements);
+        setCurrentPage(data.number + 1);
       });
   }
 
@@ -59,30 +60,35 @@ function Programa() {
   }
 
   function changePage(event) {
-    setCurrentPage(parseInt(event.target.value || "1"));
+    let targetPage = parseInt(event.target.value || "1");
+    findAllProgramas(targetPage);
+    setCurrentPage(targetPage);
   }
 
   function firstPage() {
-    if (currentPage > 1) {
-      setCurrentPage(1);
+    let firstPage = 1;
+    if (currentPage > firstPage) {
+      findAllProgramas(firstPage);
     }
   }
 
   function prevPage() {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+    let prevPage = 1;
+    if (currentPage > prevPage) {
+      findAllProgramas(currentPage - prevPage);
     }
   }
 
   function nextPage() {
-    if (currentPage < Math.ceil(programas.length / programasPerPage)) {
-      setCurrentPage(currentPage + 1);
+    if (currentPage < Math.ceil(totalElements / programasPerPage)) {
+      findAllProgramas(currentPage + 1);
     }
   }
 
   function lastPage() {
-    if (currentPage < Math.ceil(programas.length / programasPerPage)) {
-      setCurrentPage(Math.ceil(programas.length / programasPerPage));
+    let condition = Math.ceil(totalElements / programasPerPage);
+    if (currentPage < condition) {
+      findAllProgramas(condition);
     }
   }
 
@@ -124,7 +130,7 @@ function Programa() {
                   <td colSpan="4">Sem programas</td>
                 </tr>
               ) : (
-                currentProgramas.map((programa) => (
+                programas.map((programa) => (
                   <tr key={programa.id}>
                     <td>{programa.id}</td>
                     <td>{programa.nome}</td>

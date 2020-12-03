@@ -14,11 +14,12 @@ import com.example.demo.repository.ProgramaRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class AlunoService {
@@ -41,11 +42,8 @@ public class AlunoService {
     @Autowired
     private NotaAlunoService notaAlunoService;
 
-    public List<AlunoDTO> getAlunos() {
-        return alunoRepository.findByActive(true)
-                .parallelStream()
-                .map(alunoMapper::toAlunoDTO)
-                .collect(Collectors.toList());
+    public Page<AlunoDTO> getAlunos(Pageable pageable) {
+        return alunoRepository.findByActive(pageable, true).map(alunoMapper::toAlunoDTO);
     }
 
     public Optional<AlunoDTO> getAlunoByIndex(Long id) {
@@ -61,7 +59,7 @@ public class AlunoService {
         return alunoMapper.toAlunoDTO(alunoRepository.save(aluno));
     }
 
-    public void deleteAluno(Long id) {
+    public void deleteAluno(Pageable pageable, Long id) {
         Aluno aluno = alunoRepository.findById(id)
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
         aluno.setActive(false);
@@ -69,8 +67,8 @@ public class AlunoService {
         aluno.getListaNotaAluno().forEach(nota -> notaAlunoService.deleteNotaAluno(nota.getId()));
 
         alunoRepository.save(aluno);
-        List<Mentoria> listaMentoria = mentoriaRepository.findByActive(true);
-        listaMentoria.parallelStream().filter(mentoria -> !mentoria.getAluno().getActive()).forEach(mentoria -> {
+        Page<Mentoria> listaMentoria = mentoriaRepository.findByActive(pageable, true);
+        listaMentoria.filter(mentoria -> !mentoria.getAluno().getActive()).forEach(mentoria -> {
             mentoria.setActive(false);
             mentoriaRepository.save(mentoria);
         });

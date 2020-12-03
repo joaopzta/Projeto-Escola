@@ -3,17 +3,15 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.AlunoDTO;
 import com.example.demo.dto.NotaAlunoDTO;
-import com.example.demo.model.Aluno;
 import com.example.demo.service.AlunoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/aluno")
@@ -25,8 +23,8 @@ public class AlunoController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<AlunoDTO> listarAlunos() {
-        return alunoService.getAlunos();
+    public Page<AlunoDTO> listarAlunos(Pageable pageable) {
+        return alunoService.getAlunos(pageable);
     }
 
     @GetMapping("/{id}")
@@ -43,8 +41,8 @@ public class AlunoController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removerAluno(@PathVariable Long id) {
-        alunoService.deleteAluno(id);
+    public void removerAluno(Pageable pageable, @PathVariable Long id) {
+        alunoService.deleteAluno(pageable, id);
     }
 
     @PutMapping("/{id}")

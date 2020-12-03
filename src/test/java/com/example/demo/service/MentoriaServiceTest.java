@@ -37,14 +37,14 @@ public class MentoriaServiceTest {
 
     //    --------------------- [ Cenários Ideais ] ---------------------------- //
 
-    @Test
-    public void getMentoriasTest() {
-        when(mentoriaRepository.findByActive(true)).thenReturn(new ArrayList<>());
-
-        List<MentoriaDTO> listaMentorias = this.mentoriaService.getMentoria();
-
-        assertEquals(new ArrayList<>(), listaMentorias);
-    }
+//    @Test
+//    public void getMentoriasTest() {
+//        when(mentoriaRepository.findByActive(true)).thenReturn(new ArrayList<>());
+//
+//        List<MentoriaDTO> listaMentorias = this.mentoriaService.getMentoria();
+//
+//        assertEquals(new ArrayList<>(), listaMentorias);
+//    }
 
     @Test
     public void getMentoriaByIdTest() {

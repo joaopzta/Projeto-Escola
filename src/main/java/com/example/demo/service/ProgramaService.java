@@ -7,11 +7,11 @@ import com.example.demo.repository.ProgramaRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class ProgramaService {
@@ -22,11 +22,9 @@ public class ProgramaService {
     @Autowired
     private ProgramaMapper programaMapper;
 
-    public List<ProgramaDTO> getProgramas() {
-        return programaRepository.findByActive(true)
-                .parallelStream()
-                .map(programaMapper::toProgramaDTO)
-                .collect(Collectors.toList());
+    public Page<ProgramaDTO> getProgramas(Pageable pageable) {
+        return programaRepository.findByActive(pageable, true)
+                .map(programaMapper::toProgramaDTO);
     }
 
     public Optional<ProgramaDTO> getProgramaById(Long id) {

@@ -23,7 +23,7 @@ public class NotaAluno {
     @NotNull
     private Double nota;
 
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    //@JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate dataNota;
 
     @ManyToOne

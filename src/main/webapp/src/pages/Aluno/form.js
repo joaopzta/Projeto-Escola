@@ -29,28 +29,46 @@ function AlunoForm(props) {
       .get("programa")
       .then((response) => response.data)
       .then((data) => {
-        setProgramas(data);
+        setProgramas(data.content);
       });
   }, [props.match.params.id]);
 
-  function findAlunoById(id) {
-    api
-      .get(`aluno/${id}`)
-      .then((response) => {
-        if (response.data !== null) {
-          setMatricula(response.data.matricula);
-          setNome(response.data.nome);
-          setClasse(response.data.classe);
-          setSelectedPrograma(response.data.programa);
-          setListaDeNotas(response.data.listaDeNotas);
-        }
-      })
-      .catch((erro) => {
-        console.log("Erro: " + erro);
-      });
+  async function findAlunoById(id) {
+    const response = await api.get(`aluno/${id}`);
+
+    if (response.data !== null) {
+      setMatricula(response.data.matricula);
+      setNome(response.data.nome);
+      setClasse(response.data.classe);
+      setSelectedPrograma(response.data.programa);
+      setListaDeNotas(response.data.listaDeNotas);
+    }
   }
 
-  function submitForm(event) {
+  async function submitForm(event) {
+    event.preventDefault();
+
+    const aluno = {
+      nome: nome,
+      classe: classe,
+      programa: { id: selectedPrograma },
+      listaDeNotas: listaDeNotas,
+    };
+
+    const response = await api.post("aluno", aluno);
+
+    if (response.data !== null) {
+      setNome("");
+      setClasse("");
+      setShow(true);
+      setMetodo("post");
+      setTimeout(() => setShow(false), 3000);
+    } else {
+      setShow(false);
+    }
+  }
+
+  async function updateForm(event) {
     event.preventDefault();
     const aluno = {
       nome: nome,
@@ -59,49 +77,19 @@ function AlunoForm(props) {
       listaDeNotas: listaDeNotas,
     };
 
-    api
-      .post("aluno", aluno)
-      .then((response) => {
-        if (response.data !== null) {
-          if (aluno.programa !== null) {
-            setNome("");
-            setClasse("");
-            setShow(true);
-            setMetodo("post");
-            setTimeout(() => setShow(false), 3000);
-          } else {
-            console.log(aluno);
-          }
-        } else {
-          setShow(false);
-        }
-      })
-      .catch((erro) => {
-        console.log("Erro: " + erro);
-      });
-  }
+    const response = await api.put(`aluno/${matricula}`, aluno);
 
-  function updateForm(event) {
-    event.preventDefault();
-    const aluno = {
-      nome: nome,
-      classe: classe,
-      programa: { id: selectedPrograma },
-      listaDeNotas: listaDeNotas,
-    };
-    api.put(`aluno/${matricula}`, aluno).then((response) => {
-      if (response.data !== null) {
-        setNome("");
-        setClasse("");
-        setListaDeNotas(null);
-        setShow(true);
-        setMetodo("put");
-        setTimeout(() => setShow(false), 3000);
-        setTimeout(() => props.history.push("/aluno"), 3000);
-      } else {
-        setShow(false);
-      }
-    });
+    if (response.data !== null) {
+      setNome("");
+      setClasse("");
+      setListaDeNotas(null);
+      setShow(true);
+      setMetodo("put");
+      setTimeout(() => setShow(false), 3000);
+      setTimeout(() => props.history.push("/aluno"), 3000);
+    } else {
+      setShow(false);
+    }
   }
 
   return (

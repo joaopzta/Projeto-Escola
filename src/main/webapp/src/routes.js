@@ -11,6 +11,9 @@ import Programa from "./pages/Programa";
 import ProgramaForm from "./pages/Programa/form";
 import Materia from "./pages/Materia";
 import MateriaForm from "./pages/Materia/form";
+import MentoriaAluno from "./pages/Mentoria/aluno";
+import MentoriaMentor from "./pages/Mentoria/mentor";
+import Mentoria from "./pages/Mentoria";
 
 function Routes() {
   return (
@@ -33,6 +36,9 @@ function Routes() {
               <Route path="/materia" exact component={Materia} />
               <Route path="/materia/form" exact component={MateriaForm} />
               <Route path="/materia/form/:id" exact component={MateriaForm} />
+              <Route path="/mentoria" exact component={Mentoria} />
+              <Route path="/aluno/:id/mentoria" exact component={MentoriaAluno} />
+              <Route path="/mentor/:id/mentoria" exact component={MentoriaMentor} />
             </Switch>
           </Col>
         </Row>

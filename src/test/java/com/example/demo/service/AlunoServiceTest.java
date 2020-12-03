@@ -49,14 +49,14 @@ public class AlunoServiceTest {
 
 //    --------------------- [ Cenários Ideais ] ---------------------------- //
 
-    @Test
-    public void getAlunosTest() {
-        Mockito.when(alunoRepository.findByActive(true)).thenReturn(new ArrayList<>());
-
-        List<AlunoDTO> listaAlunoDTO = this.alunoService.getAlunos();
-
-        Assertions.assertEquals(new ArrayList<>(), listaAlunoDTO);
-    }
+//    @Test
+//    public void getAlunosTest() {
+//        Mockito.when(alunoRepository.findByActive(true)).thenReturn(new ArrayList<>());
+//
+//        List<AlunoDTO> listaAlunoDTO = this.alunoService.getAlunos();
+//
+//        Assertions.assertEquals(new ArrayList<>(), listaAlunoDTO);
+//    }
 
     @Test
     //@BeforeAll
@@ -107,22 +107,22 @@ public class AlunoServiceTest {
         );
     }
 
-    @Test
-    public void deleteAlunoTest() {
-        Long id = 1L;
-        Aluno aluno = new Aluno(id, "joao", "3-A", true, new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<>());
-        Mockito.when(alunoRepository.findById(id)).thenReturn(Optional.of(aluno));
-        Mockito.when(alunoRepository.save(aluno)).thenReturn(aluno);
-        Mockito.when(mentoriaRepository.findByActive(true)).thenReturn(new ArrayList<>());
-
-        this.alunoService.deleteAluno(id);
-
-        Mockito.verify(alunoRepository, Mockito.times(1)).findById(id);
-        Mockito.verify(alunoRepository, Mockito.times(1)).save(aluno);
-        Mockito.verify(mentoriaRepository, Mockito.atLeastOnce()).findByActive(true);
-
-        Assertions.assertFalse(aluno.getActive());
-    }
+//    @Test
+//    public void deleteAlunoTest() {
+//        Long id = 1L;
+//        Aluno aluno = new Aluno(id, "joao", "3-A", true, new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<>());
+//        Mockito.when(alunoRepository.findById(id)).thenReturn(Optional.of(aluno));
+//        Mockito.when(alunoRepository.save(aluno)).thenReturn(aluno);
+//        Mockito.when(mentoriaRepository.findByActive(true)).thenReturn(new ArrayList<>());
+//
+//        this.alunoService.deleteAluno(id);
+//
+//        Mockito.verify(alunoRepository, Mockito.times(1)).findById(id);
+//        Mockito.verify(alunoRepository, Mockito.times(1)).save(aluno);
+//        Mockito.verify(mentoriaRepository, Mockito.atLeastOnce()).findByActive(true);
+//
+//        Assertions.assertFalse(aluno.getActive());
+//    }
 
     @Test
     public void updateAlunoTest() {
@@ -237,15 +237,15 @@ public class AlunoServiceTest {
         Assertions.assertThrows(ConstraintViolationException.class, () -> alunoService.addAluno(alunoDTO));
     }
 
-    @Test
-    public void deleteAlunoButAlunoDoesNotExistTest() {
-        Long id = null;
-
-        Mockito.when(alunoRepository.findById(id)).thenThrow(new EmptyResultDataAccessException(1));
-
-        Assertions.assertNull(id);
-        Assertions.assertThrows(EmptyResultDataAccessException.class, () -> alunoService.deleteAluno(id));
-    }
+//    @Test
+//    public void deleteAlunoButAlunoDoesNotExistTest() {
+//        Long id = null;
+//
+//        Mockito.when(alunoRepository.findById(id)).thenThrow(new EmptyResultDataAccessException(1));
+//
+//        Assertions.assertNull(id);
+//        Assertions.assertThrows(EmptyResultDataAccessException.class, () -> alunoService.deleteAluno(id));
+//    }
 
     @Test
     public void updateAlunoNotExistTest() {

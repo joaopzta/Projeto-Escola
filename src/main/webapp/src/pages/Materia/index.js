@@ -27,20 +27,21 @@ function Materia() {
   const [currentPage, setCurrentPage] = useState(1);
   const [materiasPerPage] = useState(5);
   const [show, setShow] = useState(false);
+  const [totalElements, setTotalElements] = useState(null);
+  const [totalPages, setTotalPages] = useState(null);
 
-  const lastIndex = currentPage * materiasPerPage;
-  const firstIndex = lastIndex - materiasPerPage;
-  const currentMaterias = materias.slice(firstIndex, lastIndex);
-  const totalPages = materias.length / materiasPerPage;
+  useEffect(() => findAllMaterias(currentPage), [materiasPerPage]);
 
-  useEffect(findAllMaterias, []);
-
-  function findAllMaterias() {
+  function findAllMaterias(currentPage) {
+    currentPage -= 1;
     api
-      .get("materia")
+      .get(`materia?page=${currentPage}&size=${materiasPerPage}`)
       .then((response) => response.data)
       .then((data) => {
-        setMaterias(data);
+        setMaterias(data.content);
+        setTotalPages(data.totalPages);
+        setTotalElements(data.totalElements);
+        setCurrentPage(data.number + 1);
       });
   }
 
@@ -57,30 +58,35 @@ function Materia() {
   }
 
   function changePage(event) {
-    setCurrentPage(parseInt(event.target.value || "1"));
+    let targetPage = parseInt(event.target.value || "1");
+    findAllMaterias(targetPage);
+    setCurrentPage(targetPage);
   }
 
   function firstPage() {
-    if (currentPage > 1) {
-      setCurrentPage(1);
+    let firstPage = 1;
+    if (currentPage > firstPage) {
+      findAllMaterias(firstPage);
     }
   }
 
   function prevPage() {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+    let prevPage = 1;
+    if (currentPage > prevPage) {
+      findAllMaterias(currentPage - prevPage);
     }
   }
 
   function nextPage() {
-    if (currentPage < Math.ceil(materias.length / materiasPerPage)) {
-      setCurrentPage(currentPage + 1);
+    if (currentPage < Math.ceil(totalElements / materiasPerPage)) {
+      findAllMaterias(currentPage + 1);
     }
   }
 
   function lastPage() {
-    if (currentPage < Math.ceil(materias.length / materiasPerPage)) {
-      setCurrentPage(Math.ceil(materias.length / materiasPerPage));
+    let lastPage = Math.ceil(totalElements / materiasPerPage);
+    if (currentPage < lastPage) {
+      findAllMaterias(lastPage);
     }
   }
 
@@ -121,7 +127,7 @@ function Materia() {
                   <td colSpan="3">Sem Matérias</td>
                 </tr>
               ) : (
-                currentMaterias.map((materia) => (
+                materias.map((materia) => (
                   <tr key={materia.id}>
                     <td>{materia.id}</td>
                     <td>{materia.descricao}</td>
@@ -193,7 +199,9 @@ function Materia() {
                 <Button
                   type="button"
                   variant="outline-info"
-                  disabled={currentPage === Math.ceil(totalPages) ? true : false}
+                  disabled={
+                    currentPage === Math.ceil(totalPages) ? true : false
+                  }
                   onClick={nextPage}
                 >
                   <FontAwesomeIcon icon={faStepForward} /> Next
@@ -201,7 +209,9 @@ function Materia() {
                 <Button
                   type="button"
                   variant="outline-info"
-                  disabled={currentPage === Math.ceil(totalPages) ? true : false}
+                  disabled={
+                    currentPage === Math.ceil(totalPages) ? true : false
+                  }
                   onClick={lastPage}
                 >
                   <FontAwesomeIcon icon={faFastForward} /> Last

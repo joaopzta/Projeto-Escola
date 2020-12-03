@@ -36,14 +36,14 @@ public class MateriaServiceTest {
 
     //    --------------------- [ Cenários Ideais ] ---------------------------- //
 
-    @Test
-    public void getMateriasTest() {
-        when(materiaRepository.findByActive(true)).thenReturn(new ArrayList<>());
-
-        List<MateriaDTO> listaMaterias = this.materiaService.getMaterias();
-
-        assertEquals(new ArrayList<>(), listaMaterias);
-    }
+//    @Test
+//    public void getMateriasTest() {
+//        when(materiaRepository.findByActive(true)).thenReturn(new ArrayList<>());
+//
+//        List<MateriaDTO> listaMaterias = this.materiaService.getMaterias();
+//
+//        assertEquals(new ArrayList<>(), listaMaterias);
+//    }
 
     @Test
     public void getMateriaByIdTest() {

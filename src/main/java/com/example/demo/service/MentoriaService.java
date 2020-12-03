@@ -7,6 +7,8 @@ import com.example.demo.repository.MentoriaRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,11 +24,8 @@ public class MentoriaService {
     @Autowired
     private MentoriaMapper mentoriaMapper;
 
-    public List<MentoriaDTO> getMentoria() {
-        return mentoriaRepository.findByActive(true)
-                .parallelStream()
-                .map(mentoriaMapper::toMentoriaDTO)
-                .collect(Collectors.toList());
+    public Page<MentoriaDTO> getMentoria(Pageable pageable) {
+        return mentoriaRepository.findByActive(pageable, true).map(mentoriaMapper::toMentoriaDTO);
     }
 
     public Optional<MentoriaDTO> getMentoriaById(Long id) {

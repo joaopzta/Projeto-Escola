@@ -3,6 +3,8 @@ package com.example.demo.controller;
 import com.example.demo.dto.ProgramaDTO;
 import com.example.demo.service.ProgramaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +21,8 @@ public class ProgramaController {
     private ProgramaService programaService;
 
     @GetMapping
-    public List<ProgramaDTO> listarProgramas() {
-        return programaService.getProgramas();
+    public Page<ProgramaDTO> listarProgramas(Pageable pageable) {
+        return programaService.getProgramas(pageable);
     }
 
     @GetMapping("/{id}")

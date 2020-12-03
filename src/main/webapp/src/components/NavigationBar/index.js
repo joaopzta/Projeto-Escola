@@ -6,7 +6,7 @@ function NavigationBar() {
   return (
     <Navbar bg="dark" variant="dark">
       <Link to={"/"} className="navbar-brand">
-        <Navbar.Brand href="/">
+        <Navbar.Brand>
           <img
             src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Book_icon_1.png"
             width="25"
@@ -18,16 +18,19 @@ function NavigationBar() {
       </Link>
       <Nav className="mr-auto">
         <Link to={"/aluno"} className="nav-link">
-          Aluno
+          Alunos
         </Link>
         <Link to={"/mentor"} className="nav-link">
-          Mentor
+          Mentores
         </Link>
         <Link to={"/programa"} className="nav-link">
-          Programa
+          Programas
         </Link>
         <Link to={"/materia"} className="nav-link">
-          Materia
+          Materias
+        </Link>
+        <Link to={"/mentoria"} className="nav-link">
+          Mentorias
         </Link>
       </Nav>
     </Navbar>
