@@ -14,6 +14,7 @@ import MateriaForm from "./pages/Materia/form";
 import MentoriaAluno from "./pages/Mentoria/aluno";
 import MentoriaMentor from "./pages/Mentoria/mentor";
 import Mentoria from "./pages/Mentoria";
+import MentoriaForm from "./pages/Mentoria/form";
 
 function Routes() {
   return (
@@ -37,6 +38,8 @@ function Routes() {
               <Route path="/materia/form" exact component={MateriaForm} />
               <Route path="/materia/form/:id" exact component={MateriaForm} />
               <Route path="/mentoria" exact component={Mentoria} />
+              <Route path="/mentoria/form" exact component={MentoriaForm} />
+              <Route path="/mentoria/form/:id" exact component={MentoriaForm} />
               <Route path="/aluno/:id/mentoria" exact component={MentoriaAluno} />
               <Route path="/mentor/:id/mentoria" exact component={MentoriaMentor} />
             </Switch>

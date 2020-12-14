@@ -10,6 +10,7 @@ import {
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import api from "../../services/api";
+import MyToast from "../../components/MyToast";
 
 function MentoriaForm(props) {
   const [mentor, setMentor] = useState({});
@@ -21,6 +22,10 @@ function MentoriaForm(props) {
   const [materias, setMaterias] = useState({});
   const [selectedMateria, setSelectedMateria] = useState("");
   const [isNovaNota, setIsNovaNota] = useState(false);
+
+  const [show, setShow] = useState(false);
+  const [metodo, setMetodo] = useState("");
+  const [toastControl, setToastControl] = useState(true);
 
   const mentorId = props.match.params.id;
 
@@ -66,6 +71,15 @@ function MentoriaForm(props) {
     setMaterias(response.data.content);
   }
 
+  function limparCampos() {
+    const reset = {
+      nota: "",
+      dataNota: null,
+      materia: { id: selectedMateria },
+    };
+    setNota(reset);
+  }
+
   async function submitForm(event) {
     event.preventDefault();
 
@@ -78,18 +92,22 @@ function MentoriaForm(props) {
     try {
       const response = await api.put(`aluno/${aluno.matricula}/nota`, novaNota);
       if (response.data !== null) {
-        //setNotaArrayId(null);
-        setIsNovaNota(false)
+        limparCampos();
         getNotasAluno(aluno.matricula);
+        setMetodo("post");
+        setShow(true);
+        setTimeout(() => setShow(false), 3000);
+      } else {
+        setShow(false);
       }
     } catch (err) {
       console.error(err);
     }
-    
   }
 
   async function updateForm(event) {
     event.preventDefault();
+
     const novaNota = {
       nota: nota.nota,
       dataNota: nota.dataNota,
@@ -97,10 +115,18 @@ function MentoriaForm(props) {
     };
 
     try {
-      const response = await api.put(`aluno/${aluno.matricula}/nota/${notaArrayId}`, novaNota);
+      const response = await api.put(
+        `aluno/${aluno.matricula}/nota/${notaArrayId}`,
+        novaNota
+      );
       if (response.data !== null) {
         setNotaArrayId(null);
         getNotasAluno(aluno.matricula);
+        setMetodo("put");
+        setShow(true);
+        setTimeout(() => setShow(false), 3000);
+      } else {
+        setShow(false);
       }
     } catch (err) {
       console.error(err);
@@ -108,14 +134,43 @@ function MentoriaForm(props) {
   }
 
   async function deleteNotaAluno(id) {
-    const response = await api.delete(`aluno/${aluno.matricula}/nota/${id}`);
-    if (response.data != null) {
-      setAlunoListaNotas(alunoListaNotas.filter((nota, index) => index !== id));
+    try {
+      const response = await api.delete(`aluno/${aluno.matricula}/nota/${id}`);
+      if (response.data != null) {
+        setAlunoListaNotas(
+          alunoListaNotas.filter((nota, index) => index !== id)
+        );
+        setShow(true);
+        setTimeout(() => setShow(false), 3000);
+      } else {
+        setShow(false);
+      }
+    } catch (err) {
+      console.log(err.message);
     }
   }
 
   return (
     <div>
+      <div style={{ display: show ? "block" : "none" }}>
+        {toastControl ? (
+          <MyToast
+            show={show}
+            menssagem={
+              metodo === "put"
+                ? "Nota Atualizada com SUCESSO!"
+                : "Nota Adicionada com SUCESSO!"
+            }
+            type={"success"}
+          />
+        ) : (
+          <MyToast
+            show={show}
+            menssagem={"Nota Excluída com SUCESSO!"}
+            type={"danger"}
+          />
+        )}
+      </div>
       <Card className={"border border-dark bg-dark text-white"}>
         <Card.Header>Mentor</Card.Header>
         <Card.Body>
@@ -126,7 +181,7 @@ function MentoriaForm(props) {
                 type="text"
                 value={mentor.nome}
                 name="nome"
-                disabled
+                readOnly
               />
             </Form.Group>
           </Form>
@@ -290,13 +345,19 @@ function MentoriaForm(props) {
                       <td>{notaAluno.materia.descricao}</td>
                       <td>{notaAluno.nota}</td>
                       <td align="center">{notaAluno.dataNota}</td>
-                      <td style={{ display: "flex", justifyContent: "space-around" }}>
+                      <td
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-around",
+                        }}
+                      >
                         <ButtonGroup>
                           <Button
                             size="sm"
                             variant="outline-primary"
                             onClick={() => {
                               setNota(notaAluno);
+                              setToastControl(true);
                               setNotaArrayId(
                                 alunoListaNotas.indexOf(notaAluno)
                               );
@@ -308,7 +369,10 @@ function MentoriaForm(props) {
                             size="sm"
                             variant="outline-danger"
                             onClick={() => {
-                              deleteNotaAluno(alunoListaNotas.indexOf(notaAluno));
+                              setToastControl(false);
+                              deleteNotaAluno(
+                                alunoListaNotas.indexOf(notaAluno)
+                              );
                             }}
                           >
                             <FontAwesomeIcon icon={faTrash} />
@@ -326,6 +390,7 @@ function MentoriaForm(props) {
               <Button
                 onClick={() => {
                   setIsNovaNota(true);
+                  setToastControl(true);
                   setNotaArrayId(alunoListaNotas.length + 1);
                 }}
               >

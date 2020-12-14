@@ -6,8 +6,6 @@ import {
   Card,
   Table,
   ButtonGroup,
-  InputGroup,
-  FormControl,
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -15,13 +13,10 @@ import {
   faList,
   faTrash,
   faPlusCircle,
-  faStepForward,
-  faStepBackward,
-  faFastForward,
-  faFastBackward,
   faChalkboardTeacher,
 } from "@fortawesome/free-solid-svg-icons";
 import api from "../../services/api";
+import TablePagination from "../../components/TablePagination";
 
 function Mentor() {
   const [mentores, setMentores] = useState([]);
@@ -57,47 +52,6 @@ function Mentor() {
       }
     });
   }
-
-  function changePage(event) {
-    let targetPage = parseInt(event.target.value || "1");
-    findAllMentores(targetPage);
-    setCurrentPage(targetPage);
-  }
-
-  function firstPage() {
-    let firstPage = 1;
-    if (currentPage > firstPage) {
-      findAllMentores(firstPage);
-    }
-  }
-
-  function prevPage() {
-    let prevPage = 1
-    if (currentPage > prevPage) {
-      findAllMentores(currentPage - prevPage);
-    }
-  }
-
-  function nextPage() {
-    if (currentPage < Math.ceil(mentores.length / mentoresPerPage)) {
-      findAllMentores(currentPage + 1);
-    }
-  }
-
-  function lastPage() {
-    let lastPage = Math.ceil(totalElements / mentoresPerPage);
-    if (currentPage < lastPage) {
-      findAllMentores(lastPage);
-    }
-  }
-
-  const pageNumCss = {
-    width: "45px",
-    border: "1px solid #17A2B8",
-    color: "#17A2B8",
-    textAlign: "center",
-    fontWeight: "bold",
-  };
 
   return (
     <div>
@@ -174,60 +128,13 @@ function Mentor() {
           </Link>
         </Card.Body>
         <Card.Footer>
-          <div style={{ float: "left" }}>
-            Showing Page {currentPage} of {Math.ceil(totalPages)}
-          </div>
-          <div style={{ float: "right" }}>
-            <InputGroup size="sm">
-              <InputGroup.Prepend>
-                <Button
-                  type="button"
-                  variant="outline-info"
-                  disabled={currentPage === 1 ? true : false}
-                  onClick={firstPage}
-                >
-                  <FontAwesomeIcon icon={faFastBackward} /> First
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline-info"
-                  disabled={currentPage === 1 ? true : false}
-                  onClick={prevPage}
-                >
-                  <FontAwesomeIcon icon={faStepBackward} /> Prev
-                </Button>
-              </InputGroup.Prepend>
-              <FormControl
-                style={pageNumCss}
-                className={"bg-dark"}
-                name="currentPage"
-                value={currentPage}
-                onChange={changePage}
-              />
-              <InputGroup.Append>
-                <Button
-                  type="button"
-                  variant="outline-info"
-                  disabled={
-                    currentPage === Math.ceil(totalPages) ? true : false
-                  }
-                  onClick={nextPage}
-                >
-                  <FontAwesomeIcon icon={faStepForward} /> Next
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline-info"
-                  disabled={
-                    currentPage === Math.ceil(totalPages) ? true : false
-                  }
-                  onClick={lastPage}
-                >
-                  <FontAwesomeIcon icon={faFastForward} /> Last
-                </Button>
-              </InputGroup.Append>
-            </InputGroup>
-          </div>
+          <TablePagination
+            currentPage={currentPage}
+            itensPerPage={mentoresPerPage}
+            totalElements={totalElements}
+            totalPages={totalPages}
+            findAllItens={findAllMentores}
+          />
         </Card.Footer>
       </Card>
     </div>

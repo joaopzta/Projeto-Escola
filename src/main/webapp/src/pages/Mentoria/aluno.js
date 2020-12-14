@@ -50,7 +50,7 @@ function Mentoria(props) {
               <Form.Group as={Col}>
                 <Form.Label>Matricula</Form.Label>
                 <Form.Control
-                  value={aluno.matricula}
+                  value={aluno.matricula || ''}
                   type="text"
                   name="matricula"
                   disabled
@@ -59,7 +59,7 @@ function Mentoria(props) {
               <Form.Group as={Col}>
                 <Form.Label>Nome</Form.Label>
                 <Form.Control
-                  value={aluno.nome}
+                  value={aluno.nome || ''}
                   type="text"
                   name="nome"
                   disabled
@@ -70,7 +70,7 @@ function Mentoria(props) {
               <Form.Group as={Col}>
                 <Form.Label>Classe</Form.Label>
                 <Form.Control
-                  value={aluno.classe}
+                  value={aluno.classe || ''}
                   type="text"
                   name="classe"
                   disabled
@@ -79,7 +79,7 @@ function Mentoria(props) {
               <Form.Group as={Col}>
                 <Form.Label>Programa</Form.Label>
                 <Form.Control
-                  value={alunoPrograma.nome}
+                  value={alunoPrograma.nome || ''}
                   type="text"
                   name="programa"
                   disabled
