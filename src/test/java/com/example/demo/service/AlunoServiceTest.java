@@ -10,18 +10,25 @@ import com.example.demo.model.Programa;
 import com.example.demo.repository.AlunoRepository;
 import com.example.demo.repository.MentoriaRepository;
 import com.example.demo.repository.ProgramaRepository;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,14 +56,21 @@ public class AlunoServiceTest {
 
 //    --------------------- [ Cenários Ideais ] ---------------------------- //
 
-//    @Test
-//    public void getAlunosTest() {
-//        Mockito.when(alunoRepository.findByActive(true)).thenReturn(new ArrayList<>());
-//
-//        List<AlunoDTO> listaAlunoDTO = this.alunoService.getAlunos();
-//
-//        Assertions.assertEquals(new ArrayList<>(), listaAlunoDTO);
-//    }
+    @Test
+    public void getAlunosTest() {
+        Pageable pageable = PageRequest.of(0,1);
+
+        List<Aluno> alunos = Arrays.asList(new Aluno(), new Aluno());
+
+        Page<Aluno> alunoPage = new PageImpl<>(alunos);
+
+        Mockito.when(alunoRepository.findByActive(pageable, true)).thenReturn(alunoPage);
+        Mockito.when(alunoMapper.toAlunoDTO(new Aluno())).thenReturn(new AlunoDTO());
+
+        Page<AlunoDTO> pageAlunoDTO = this.alunoService.getAlunos(pageable);
+
+        Assertions.assertEquals(alunoPage.map(alunoMapper::toAlunoDTO), pageAlunoDTO);
+    }
 
     @Test
     //@BeforeAll
@@ -111,15 +125,22 @@ public class AlunoServiceTest {
 //    public void deleteAlunoTest() {
 //        Long id = 1L;
 //        Aluno aluno = new Aluno(id, "joao", "3-A", true, new Programa(id, "INSIDERS", LocalDate.parse("2020-09-10"), true), new ArrayList<>());
+//
+//        Pageable pageable = PageRequest.of(0, 1);
+//
+//        List<Mentoria> mentorias = Arrays.asList(new Mentoria(), new Mentoria());
+//
+//        Page<Mentoria> mentoriaPage = new PageImpl<>(mentorias);
+//
 //        Mockito.when(alunoRepository.findById(id)).thenReturn(Optional.of(aluno));
 //        Mockito.when(alunoRepository.save(aluno)).thenReturn(aluno);
-//        Mockito.when(mentoriaRepository.findByActive(true)).thenReturn(new ArrayList<>());
+//        Mockito.when(mentoriaRepository.findByActive(pageable, true)).thenReturn(mentoriaPage);
 //
-//        this.alunoService.deleteAluno(id);
+//        this.alunoService.deleteAluno(pageable, id);
 //
 //        Mockito.verify(alunoRepository, Mockito.times(1)).findById(id);
 //        Mockito.verify(alunoRepository, Mockito.times(1)).save(aluno);
-//        Mockito.verify(mentoriaRepository, Mockito.atLeastOnce()).findByActive(true);
+//        Mockito.verify(mentoriaRepository, Mockito.atLeastOnce()).findByActive(pageable, true);
 //
 //        Assertions.assertFalse(aluno.getActive());
 //    }
@@ -237,15 +258,16 @@ public class AlunoServiceTest {
         Assertions.assertThrows(ConstraintViolationException.class, () -> alunoService.addAluno(alunoDTO));
     }
 
-//    @Test
-//    public void deleteAlunoButAlunoDoesNotExistTest() {
-//        Long id = null;
-//
-//        Mockito.when(alunoRepository.findById(id)).thenThrow(new EmptyResultDataAccessException(1));
-//
-//        Assertions.assertNull(id);
-//        Assertions.assertThrows(EmptyResultDataAccessException.class, () -> alunoService.deleteAluno(id));
-//    }
+    @Test
+    public void deleteAlunoButAlunoDoesNotExistTest() {
+        Long id = null;
+        Pageable pageable = PageRequest.of(0,1);
+
+        Mockito.when(alunoRepository.findById(id)).thenThrow(new EmptyResultDataAccessException(1));
+
+        Assertions.assertNull(id);
+        Assertions.assertThrows(EmptyResultDataAccessException.class, () -> alunoService.deleteAluno(pageable, id));
+    }
 
     @Test
     public void updateAlunoNotExistTest() {

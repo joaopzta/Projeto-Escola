@@ -10,13 +10,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,7 +32,7 @@ public class ProgramaServiceTest {
     @Mock
     ProgramaRepository programaRepository;
 
-    @Mock
+    @Spy
     ProgramaMapper programaMapper;
 
     @InjectMocks
@@ -35,20 +40,20 @@ public class ProgramaServiceTest {
 
     //    --------------------- [ Cenários Ideais ] ---------------------------- //
 
-//    @Test
-//    public void getProgramasTest() {
-//        Pageable pageable = PageRequest.of(0, 2);
-//        List<ProgramaDTO> listaDeProgramaDTO = Arrays.asList(new ProgramaDTO(), new ProgramaDTO());
-//        //Page<ProgramaDTO> listaDeProgramaDTOPage = new PageImpl<>(listaDeProgramaDTO);
-//
-//        Page listaDeProgramaDTOPage = Mockito.mock(Page.class);
-//
-//        Mockito.when(programaRepository.findByIdAndActive(org.mockito.Matchers.isA(Pageable.class))).thenReturn(listaDeProgramaDTOPage);
-//
-//        Page<ProgramaDTO> listaProgramasDTO = this.programaService.getProgramas(pageable);
-//
-//        assertEquals(new PageImpl<>(listaDeProgramaDTO), listaProgramasDTO);
-//    }
+    @Test
+    public void getProgramasTest() {
+        Pageable pageable = PageRequest.of(0, 2);
+        List<Programa> programas = Arrays.asList(new Programa(), new Programa());
+
+        Page<Programa> pageProgramas = new PageImpl<>(programas);
+
+        Mockito.when(programaRepository.findByActive(pageable, true)).thenReturn(pageProgramas);
+        Mockito.when(programaMapper.toProgramaDTO(new Programa())).thenReturn(new ProgramaDTO());
+
+        Page<ProgramaDTO> listaProgramasDTO = this.programaService.getProgramas(pageable);
+
+        assertEquals(pageProgramas.map(programaMapper::toProgramaDTO), listaProgramasDTO);
+    }
 
     @Test
     public void getProgramaByIdTest() {

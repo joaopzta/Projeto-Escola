@@ -13,10 +13,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,14 +45,18 @@ public class MentorServiceTest {
 
     //    --------------------- [ Cenários Ideais ] ---------------------------- //
 
-//    @Test
-//    public void getMentoresTest() {
-//        Mockito.when(mentorRepository.findByActive(true)).thenReturn(new ArrayList<>());
-//
-//        List<MentorDTO> listaMentoresDTO = this.mentorService.getMentores();
-//
-//        assertEquals(new ArrayList<>(), listaMentoresDTO);
-//    }
+    @Test
+    public void getMentoresTest() {
+        Pageable pageable = PageRequest.of(0, 2);
+        List<Mentor> mentores = Arrays.asList(new Mentor(), new Mentor());
+        Page<Mentor> mentorPage = new PageImpl<>(mentores);
+
+        Mockito.when(mentorRepository.findByActive(pageable, true)).thenReturn(mentorPage);
+
+        Page<MentorDTO> listaMentoresDTO = this.mentorService.getMentores(pageable);
+
+        assertEquals(mentorPage.map(mentorMapper::toMentorDTO), listaMentoresDTO);
+    }
 
     @Test
     public void getMentoresByIdTest() {
@@ -150,14 +159,15 @@ public class MentorServiceTest {
         assertThrows(ConstraintViolationException.class, () -> mentorService.addMentor(mentorDTO));
     }
 
-//    @Test
-//    public void deleteMentorButMentorDoesNotExistTest() {
-//        Long id = null;
-//
-//        Mockito.when(mentorRepository.findByIdAndActive(id, true)).thenThrow(new EmptyResultDataAccessException(1));
-//
-//        assertThrows(EmptyResultDataAccessException.class, () -> mentorService.deleteMentor(id));
-//    }
+    @Test
+    public void deleteMentorButMentorDoesNotExistTest() {
+        Long id = null;
+        Pageable pageable = PageRequest.of(0,1);
+
+        Mockito.when(mentorRepository.findByIdAndActive(id, true)).thenThrow(new EmptyResultDataAccessException(1));
+
+        assertThrows(EmptyResultDataAccessException.class, () -> mentorService.deleteMentor(pageable, id));
+    }
 
     @Test
     public void updateMentorNotExistTest() {

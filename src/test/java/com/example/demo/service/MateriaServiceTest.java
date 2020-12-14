@@ -11,10 +11,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,14 +41,20 @@ public class MateriaServiceTest {
 
     //    --------------------- [ Cenários Ideais ] ---------------------------- //
 
-//    @Test
-//    public void getMateriasTest() {
-//        when(materiaRepository.findByActive(true)).thenReturn(new ArrayList<>());
-//
-//        List<MateriaDTO> listaMaterias = this.materiaService.getMaterias();
-//
-//        assertEquals(new ArrayList<>(), listaMaterias);
-//    }
+    @Test
+    public void getMateriasTest() {
+        Pageable pageable = PageRequest.of(0,2);
+
+        List<Materia> materias = Arrays.asList(new Materia(), new Materia());
+
+        Page<Materia> materiaPage = new PageImpl<>(materias);
+
+        when(materiaRepository.findByActive(pageable, true)).thenReturn(materiaPage);
+
+        Page<MateriaDTO> listaMaterias = this.materiaService.getMaterias(pageable);
+
+        assertEquals(materiaPage.map(materiaMapper::toMateriaDTO), listaMaterias);
+    }
 
     @Test
     public void getMateriaByIdTest() {

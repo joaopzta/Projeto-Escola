@@ -13,9 +13,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import javax.validation.ConstraintViolationException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,14 +41,18 @@ public class MentoriaServiceTest {
 
     //    --------------------- [ Cenários Ideais ] ---------------------------- //
 
-//    @Test
-//    public void getMentoriasTest() {
-//        when(mentoriaRepository.findByActive(true)).thenReturn(new ArrayList<>());
-//
-//        List<MentoriaDTO> listaMentorias = this.mentoriaService.getMentoria();
-//
-//        assertEquals(new ArrayList<>(), listaMentorias);
-//    }
+    @Test
+    public void getMentoriasTest() {
+        Pageable pageable = PageRequest.of(0, 2);
+        List<Mentoria> mentorias = Arrays.asList(new Mentoria(), new Mentoria());
+        Page<Mentoria> mentoriaPage = new PageImpl<>(mentorias);
+
+        when(mentoriaRepository.findByActive(pageable, true)).thenReturn(mentoriaPage);
+
+        Page<MentoriaDTO> listaMentorias = this.mentoriaService.getMentoria(pageable);
+
+        assertEquals(mentoriaPage.map(mentoriaMapper::toMentoriaDTO), listaMentorias);
+    }
 
     @Test
     public void getMentoriaByIdTest() {
